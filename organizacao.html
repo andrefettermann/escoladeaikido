@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+	<meta charset="UTF-8">
+	<title>Escola de Aikidô</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" type="text/css" href="css/reset.css">
+	<link rel="stylesheet" type="text/css" href="css/style.css">
+</head>
+
+<body onload="loadOrganization();">
+
+	<header>
+		<div class="container">
+			<h2>Escola de aikidô</h2>
+		</div>
+	</header>
+
+	<main>
+		<section id="root" class="container">
+			<h2 id="organization-name"></h2>
+			<div>
+				<span id="organization-actions" class="organization-actions">
+					<a id="organization-edit">Editar</a> | <a id="organization-delete" href="#"
+						onclick="deleteOrganization();">Excluir</a></span>
+			</div>
+			<span id="organization-details" class="organization-details"></span>
+		</section>
+
+		<section class="container">
+			<div class="tab">
+				<button class="tablinks" onclick="openTab(event, 'dojos')">Dojos</button>
+				<button class="tablinks" onclick="openTab(event, 'pessoas')">Pessoas</button>
+				<button class="tablinks" onclick="openTab(event, 'graduacoes')">Graduações</button>
+			</div>
+
+			<div id="dojos" class="tabcontent"></div>
+			<div id="pessoas" class="tabcontent">
+				<h1>Pessoas</h1>
+				<p>Pessoas are those who train.</p>
+			</div>
+			<div id="graduacoes" class="tabcontent">Aqui aparecem os exames!!!!!</div>
+		</section>
+
+	</main>
+
+</body>
+<script src="js/index.js"></script>
+<script type="text/javascript">
+	const editLink = document.querySelector("#organization-edit");
+	editLink.href = "form-organizacao.html?oid=" + oid;
+</script>
+
+</html>
