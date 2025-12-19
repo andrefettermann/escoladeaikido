@@ -1,0 +1,26 @@
+{
+  "name": "escoladeaikido",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare"
+  },
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "nuxt": "^4.2.2",
+    "nuxt-auth-utils": "^0.5.26",
+    "nuxt-mongoose": "^1.0.6",
+    "nuxt-server-utils": "^0.0.7",
+    "vue": "^3.5.25",
+    "vue-router": "^4.6.3",
+    "zod": "^4.2.1"
+  },
+  "devDependencies": {
+    "@types/bcrypt": "^6.0.0",
+    "@types/node": "^25.0.3"
+  }
+}
