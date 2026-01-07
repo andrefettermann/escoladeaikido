@@ -3,7 +3,9 @@
 
 <div class="container">
     
-    <NavigationBarPublic  />
+    <NavigationBarPublic v-if="!loggedIn" />
+
+    <NavigationBarPrivate v-if="loggedIn" />
 
     <slot /> <!-- This is where your page content will be injected -->
 
@@ -19,7 +21,8 @@
 
 
 <script setup lang="ts">
-    const { user , clear: clearSession } = useUserSession()
+    import { useMensagem } from '~/composable/useMensagem';
+    const { user , clear: clearSession, loggedIn } = useUserSession()
 
     async function logout () {
         await clearSession()

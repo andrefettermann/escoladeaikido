@@ -21,32 +21,60 @@
                         <ul class="nav navbar-nav ms-auto"> 
 
                             <li class="nav-item">
-                                <nuxt-link id="sobre_nos" name="sobre_nos" 
+                                <nuxt-link id="pessoas" name="pessoas" 
                                 class="nav-link" active-class="active bg-primary text-white rounded"
                                 aria-current="page"
-                                :to = " { path: '/sobre' } ">
-                                    Sobre nós
+                                :to = " { path: '/pessoas' } ">
+                                    Pessoas
                                 </nuxt-link>
                             </li> 
 
                             <li class="nav-item">
-                                <nuxt-link id="sobre_aikido" name="sobre_aikido" 
+                                <nuxt-link id="dojos" name="dojos" 
                                 class="nav-link" active-class="active bg-primary text-white rounded"
                                 aria-current="page"
-                                :to = " { path: '/sobre_aikido' } ">
-                                    Sobre o Aikidô
+                                :to = " { path: '/dojos' } ">
+                                    Dojos
                                 </nuxt-link>
                             </li> 
 
                             <li class="nav-item">
-                                <nuxt-link id="onde_treinar" name="onde_treinar" 
+                                <nuxt-link id="graduacoes" name="graduacoes" 
                                 class="nav-link" active-class="active bg-primary text-white rounded"
                                 aria-current="page"
-                                :to = " { path: '/onde_treinar' } ">
-                                    Onde treinar
+                                :to = " { path: '/graduacoes' } ">
+                                    Graduações
                                 </nuxt-link>
                             </li> 
                             
+                            <li class="nav-item dropdown">
+                                <nuxt-link id="financeiro" name="financeiro" 
+                                class="nav-link dropdown-toggle" href="#" 
+                                role="button" data-bs-toggle="dropdown" 
+                                aria-expanded="false">
+                                        Financeiro
+                                </nuxt-link>
+                                <ul class="dropdown-menu">
+                                    <li>
+                                        <nuxt-link id="taxas" name="taxas" 
+                                        :to=" { path: '/taxas/lista_taxas' } " 
+                                        class="nav-link" aria-current="page">
+                                            Taxas
+                                        </nuxt-link>
+                                    </li>
+                                    <li>
+                                        <nuxt-link id="menu-cobrancas" name="menu-cobrancas" 
+                                        :to=" { path: '/cobrancas' } " 
+                                        class="nav-link" aria-current="page">
+                                            Cobranças
+                                        </nuxt-link>
+                                    </li>
+                                </ul>
+                            </li>
+
+                            <li class="nav-item"><a id="menu-sair" name="menu-sair" 
+                                @click="logout" class="nav-link">Sair</a>
+                            </li>
 
                         </ul>
                     </div>

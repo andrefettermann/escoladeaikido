@@ -13,11 +13,11 @@ export const PessoaSchema = defineMongooseModel({
         },
         nome: {
             type: String,
-            required: true
+            required: [true, 'O nome é obrigatório.'],
         },
-        situacao: {
-            type: String,
-            required: true
+        is_ativo: {
+            type: Boolean,
+            required: false
         },
         cpf: {
             type: String,
@@ -30,6 +30,10 @@ export const PessoaSchema = defineMongooseModel({
         data_matricula: {
             type: String,
             required: false
+        },
+        tipo: {
+            type: String,
+            required: [true, 'O tipo é obrigatório.'],
         },
         id_dojo: {
             type: String,
