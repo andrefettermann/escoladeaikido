@@ -25,14 +25,14 @@
 
     <div class="card">
       <div class="card-header fw-bold">
-        <span>{{ pessoa.nome }} ({{ pessoa.graduacao }})</span>
+        <span>{{ pessoa.nome }} ({{ pessoa.graduacao.nome }})</span>
       </div>
       <div class="card-body">
           <div class="row">
               <div class="col">
 
                 
-                <div v-if="pending" class="loading">
+                <div v-if="loading" class="loading">
                   Carregando dados...
                 </div>
 
@@ -41,53 +41,49 @@
                   <button @click="() => refresh()" class="btn">Tentar novamente</button>
                 </div>
 
-                <div v-else-if="data?.sucesso" class="col">
+                <div v-else-if="pessoa" class="col">
                   <div class="row mb-2">
                     <div class="col">
-                      <strong>Matrícula</strong><br/>
-                      {{ pessoa.matricula }}
+                      <strong>Matrícula:</strong> {{ pessoa.matricula }}
                     </div>
                   </div>
                   <div class="row mb-2">
                     <div class="col">
-                      <strong>Aniversário</strong><br/>
-                      {{ pessoa.aniversario }}
+                      <strong>Aniversário:</strong> {{ pessoa.aniversario }}
                     </div>
                   </div>
                   <div class="row mb-2">
                     <div class="col">
-                      <strong>CPF</strong><br/>
-                      {{ pessoa.cpf }}
+                      <strong>CPF:</strong> {{ pessoa.cpf }}
                     </div>
                   </div>
                   <div class="row mb-2">
                     <div class="col">
-                      <strong>Em atividade?</strong><br/>
-                      {{ pessoa.is_ativo?'Sim':'Não' }}
+                      <strong>Em atividade?</strong> {{ pessoa.is_ativo?'Sim':'Não' }}
                     </div>
                   </div>
                   <div class="row mb-2">
                     <div class="col">
-                      <strong>Data de Início no Aikido</strong><br/>
+                      <strong>Data de Início no Aikido:</strong>
                       {{ pessoa.data_inicio_aikido || 'N/A' }}
                     </div>
                   </div>
                   <div class="row mb-2">
                     <div class="col">
-                      <strong>Data de Matrícula</strong><br/>
+                      <strong>Data de Matrícula:</strong>
                       {{ pessoa.data_matricula || 'N/A' }}
                     </div>
                   </div>
                   <div class="row mb-2">
                     <div class="col">
-                      <strong>Tipo</strong><br/>
-                      {{ pessoa.tipo }}
+                      <strong>Tipo:</strong>
+                      {{ pessoa.tipo.charAt(0).toUpperCase() + pessoa.tipo.slice(1) }}
                   </div>
                 </div>
                 <div class="row mb-2">
                   <div class="col">
-                      <strong>Dojo</strong><br/>
-                      {{ pessoa.dojo }}
+                      <strong>Dojo:</strong>
+                      {{ pessoa.dojo.nome }}
                   </div>
                 </div>
 
@@ -95,13 +91,23 @@
                   <div class="card-header fw-bold">Promoções</div>
                       <div class="card-body">
                         <ul id="lista" class="list-group mb-2">
-                          <li v-for="promocao in pessoa.promocoes" :key="promocao.id" class="list-group-item">
+                          <li v-for="promocao in pessoa.promocoes" :key="promocao.id_graduacao" class="list-group-item">
                             {{ promocao.data }} - {{ promocao.nome_graduacao }}
                           </li>
                       </ul>
                     </div>
                   </div>
 
+                <div class="card mb-3 mt-4">
+                  <div class="card-header fw-bold">Cobranças</div>
+                      <div class="card-body">
+                        <ul id="lista" class="list-group mb-2">
+                          <li v-for="cobranca in pessoa.cobrancas" :key="cobranca.id_graduacao" class="list-group-item">
+                            {{ cobranca.data }} - {{ cobranca.nome_graduacao }}
+                          </li>
+                      </ul>
+                    </div>
+                  </div>
                 </div>
 
                 
@@ -113,7 +119,7 @@
 </template>
 
 <script setup lang="ts">
-import { useMensagem } from '~/composable/useMensagem';
+import { useMensagem } from '~/composables/useMensagem';
 
 definePageMeta({
   middleware: ['authenticated']
@@ -136,12 +142,13 @@ function showMessage(text: string, type: 'success' | 'error' | 'info' = 'info') 
 }
 
 // Computed para determinar qual endpoint usar baseado nos query params
-const endpoint = computed(() => {
-    return `/api/pessoas/${id}`;
-});
+//const endpoint = computed(() => {
+//    return `/api/pessoas/${id}`;
+//});
 
 // Busca os dados através da API route do servidor
 // O watch: ['endpoint'] faz o refetch automático quando a rota mudar
+/*
 interface resposta { 
   sucesso: boolean,
   dados?: any,
@@ -172,5 +179,18 @@ const pessoa =  {
     graduacao: data.value?.dados?.graduacao?.nome || 'N/A',
     promocoes: data.value?.dados?.promocoes || []
 };
+*/
+// Busca a pessoa se id for fornecido
+const { pessoa, loading, error, refresh } = await usePessoa(id);
+if (error.value) {
+  console.error('Erro ao buscar pessoa:', error.value);
+  const mensagem = error.value.data?.message 
+    || error.value.message 
+    || 'Erro ao buscar pessoa.';
+  showMessage(mensagem, 'error');
+} else {
+  const mensagem = 'Pessoa carregada com sucesso.';
+  showMessage(mensagem, 'info');
+} 
 
 </script>

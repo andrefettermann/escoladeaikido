@@ -3,6 +3,20 @@
     <div class="card">
       <div class="card-header fw-bold">{{ title }}</div>
       <div class="card-body">
+
+        <div v-if="loading" class="text-center">
+          <p class="mb-4">Carregando dados...</p>
+          <div class="w-full bg-gray-200 rounded-full h-6 overflow-hidden" 
+          role="progressbar" aria-label="Animated striped example" aria-valuenow="75" 
+          aria-valuemin="0" aria-valuemax="100">
+            <div class="h-full bg-blue-600 animate-pulse" style="width: 75%"></div>
+          </div>
+        </div>
+      
+        <div v-else-if="error" class="error">
+          Erro ao carregar dados: {{ error.message }}
+        </div>
+
         <form id="formulario" @submit.prevent="grava">
 
           <!-- Info Alert -->
@@ -237,8 +251,7 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, ref, computed } from 'vue'
-import { useMensagem } from '~/composable/useMensagem';
+import { ref, computed } from 'vue'
 
 definePageMeta({
   middleware: ['authenticated']
@@ -258,89 +271,23 @@ function showMessage(text: string, type: 'success' | 'error' | 'info' = 'info') 
   setMensagem(text, type === 'error' ? 'error' : 'success');
 }
 
-
 const route = useRoute();
 const query = route.query;
 const id = (query.id as string) || '';
 
 const title = id ? 'Edita Pessoa' : 'Nova Pessoa';
 
-interface Promocao {
-  data: string;
-  id_graduacao: string;
-}
-
-interface Pessoa {
-  id: string;
-  nome: string;
-  matricula: string;
-  aniversario: string;
-  is_ativo: boolean;
-  cpf: string;
-  tipo: string;
-  dojo: {
-    _id: string;
-    nome: string;
-  };
-  data_inicio_aikido: string;
-  data_matricula: string;
-  graduacao: {
-    _id: string;
-    nome: string;
-    faixa: string;
-    sequencia: number;
-  };
-  promocoes: Promocao[];
-}
-
-// Reactive pessoa object
-const pessoa = reactive<Pessoa & { dojoId: string }>({
-  id: '',
-  nome: '',
-  matricula: '',
-  aniversario: '',
-  is_ativo: true,
-  cpf: '',
-  tipo: '',
-  dojoId: '',
-  dojo: {
-    _id: '',
-    nome: ''
-  },
-  data_inicio_aikido: '',
-  data_matricula: '',
-  graduacao: {
-    _id: '',
-    nome: '',
-    faixa: '',
-    sequencia: 0
-  },
-  promocoes: []
-});
-
-//
-// Busca os dados da pessoa somente na alteracao (id != null)
-//
-if (id) {
-  const pessoaEndpoint = computed(() => `/api/pessoas/${id}`);
-    const { data, error } = await useFetch<{dados: any; }>(pessoaEndpoint, 
-      { 
-        watch: [pessoaEndpoint] 
-      });
-
-    if (error.value) {
-      console.error('Erro ao buscar pessoa:', error.value);
-      const mensagem = error.value.data?.message 
-        || error.value.message 
-        || 'Erro ao buscar pessoa.';
-      showMessage(mensagem, 'error');
-    } else if (data.value) {
-      Object.assign(pessoa, data.value.dados);
-      // Sincroniza o ID auxiliar
-      console.log('Pessoa dojo:', data.value.dados?.dojo);
-      pessoa.dojoId = data.value.dados?.dojo?._id || '';
-    }
-}
+// Busca a pessoa se id for fornecido
+const { pessoa, loading, error } = await usePessoa(id);
+if (error.value) {
+  const mensagem = error.value.data?.message 
+    || error.value.message 
+    || 'Erro ao buscar pessoa.';
+  showMessage(mensagem, 'error');
+} else {
+  const mensagem = 'Pessoa carregada com sucesso.';
+  showMessage(mensagem, 'info');
+} 
 
 //
 // Busca as graduações para popular o select
@@ -458,20 +405,12 @@ async function grava() {
     return;
   }
 
-  if (!isValidDateDDMM(pessoa.aniversario || '') 
-    || !isValidDateDDMM(pessoa.data_inicio_aikido || '') 
-    || !isValidDateDDMM(pessoa.data_matricula || '')) {
-    showMessage('Datas devem estar no formato dd/mm ou ficar em branco.', 'error');
+  if (!isValidDateDDMM(pessoa.aniversario || ''))  {
+    showMessage('A data de aniversário deve estar no formato dd/mm.', 'error');
     return;
   }
 
-  // Sincroniza dojoId com dojo._id
-  if (pessoa.dojoId) {
-    if (!pessoa.dojo) pessoa.dojo = { _id: '', nome: '' };
-    pessoa.dojo._id = pessoa.dojoId;
-  } else {
-    pessoa.dojo = { _id: '', nome: '' };
-  }
+  // dojoId is already synced in pessoa object
 
   const endpoint = pessoa.id ? `/api/pessoas/${pessoa.id}` : '/api/pessoas';
   const method = pessoa.id ? 'PATCH' : 'POST';
@@ -482,9 +421,9 @@ async function grava() {
       method,
       body: pessoa
     });
-
+    
     showMessage('Pessoa gravada com sucesso!', 'success');
-    await navigateTo('/pessoas', { replace: true });
+//    await navigateTo('/pessoas') //, { replace: true });
   } catch (err: any) {
     console.error(err);
     showMessage(err?.data?.message || 'Erro ao gravar pessoa', 'error');
@@ -498,16 +437,18 @@ async function grava() {
 const adicionarPromocao = () => {
   // Inicializa o array se não existir
   if (!pessoa.promocoes) {
-    pessoa.promocoes = []
+    pessoa.promocoes = [];
   }
   
-  pessoa.promocoes.push({
-    data: '',
-    id_graduacao: ''
-  })
+  if (pessoa.promocoes) {
+    pessoa.promocoes.push({
+      data: '',
+      id_graduacao: '',
+      nome_graduacao: ''
+    });
+  }
 }
 
-//
 // Função para remover promoção
 //
 const removerPromocao = (index: number) => {

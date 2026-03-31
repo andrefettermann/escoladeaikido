@@ -84,8 +84,6 @@
 </template>
 
 <script setup lang="ts">
-import { useMensagem } from '~/composable/useMensagem';
-
 // Verifica se esta logado
 //definePageMeta({
 //  middleware: ['authenticated']

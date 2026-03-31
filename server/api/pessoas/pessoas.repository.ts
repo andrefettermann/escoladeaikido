@@ -130,6 +130,62 @@ export async function findAll(): Promise<Resposta> {
   }
 };
 
+export async function findBySituacao(situacao: string): Promise<Resposta> {
+  var isAtivo = false;
+  if (situacao !== 'ativo' && situacao !== 'inativo') {
+    return {
+        sucesso: false,
+        mensagem: 'Situação inválida. Use "ativo" ou "inativo".',
+    };
+  }
+
+  if (situacao === 'ativo') {
+    isAtivo = true;
+  }
+
+  const pipeline = [
+      { $match: { is_ativo: isAtivo } },
+      lookupDojo,
+      lookupGraduacao,
+      {
+          $project: {
+              _id: 1,
+              nome: 1,
+              aniversario: 1,
+              matricula: 1,
+              is_ativo: 1,
+              dojo: 1,
+              graduacao: 1
+          } 
+      },
+  ];
+
+  try {
+      const response = await PessoaSchema.aggregate(pipeline)
+          .allowDiskUse(true)
+          .option({ maxTimeMS: 15000 })
+          .exec();
+
+      if (!response || response.length === 0) {
+          return {
+              sucesso: false,
+              mensagem: 'Nenhuma pessoa encontrada para a situação informada.',
+          };
+      }
+
+      return {
+          sucesso: true,
+          docs: response,
+      };
+  } catch (error) {
+      console.error("Erro ao buscar pessoas por situação:", error);
+      return {
+          sucesso: false,
+          docs: [],
+          mensagem: 'Erro ao buscar as pessoas por situação.',
+      };
+  }
+}
 
 export async function update(id: string, dados: any): Promise<Resposta> {
 

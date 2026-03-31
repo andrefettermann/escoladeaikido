@@ -1,6 +1,15 @@
 <template>
   <div>
 
+    <!-- Mensagens -->
+    <div v-if="localMessage" :class="['alert', localMessageType === 'error' ? 'alert-danger' : localMessageType === 'success' ? 'alert-success' : 'alert-info', 'alert-dismissible']">
+      <strong v-if="localMessageType === 'error'">Erro:</strong>
+      <strong v-else-if="localMessageType === 'success'">Ok:</strong>
+      <strong v-else>Info:</strong>
+      <span class="ms-1">{{ localMessage }}</span>
+      <button type="button" class="btn-close" @click="localMessage = ''" aria-label="Fechar"></button>
+    </div>
+
     <figure>
       <blockquote class="blockquote fs-2 fw-bold">
         <p>Pessoas cadastradas</p>
@@ -10,7 +19,34 @@
           Total encontrado: {{ pessoasFiltradas.length }}</span>
       </figcaption>
     </figure>
-    
+
+    <div class="mb-2">
+
+        <NuxtLink id="todas" name="todas" 
+          class="btn btn-primary btn-sm m-1" 
+          to="/pessoas">Todos</NuxtLink>
+        
+        <NuxtLink id="ativas" name="ativas" 
+          class="btn btn-primary btn-sm m-1 disabled" 
+          to="/pessoas/lista_pessoas?situacao=Ativo">Em atividade</NuxtLink>
+
+        <NuxtLink id="inativas" name="inativas" 
+          class="btn btn-primary btn-sm m-1" 
+          to="/pessoas?situacao=inativo">Inativas</NuxtLink>
+
+        <NuxtLink id="aniversariantes" 
+          name="aniversariantes" 
+          class="btn btn-primary btn-sm m-1 disabled" 
+          :to="`/pessoas/lista_pessoas?mes=${mesCorrente}`">Aniversariantes do mês
+        </NuxtLink>
+
+        <NuxtLink id="professores" name="professores" 
+          class="btn btn-primary btn-sm m-1 disabled" 
+          to="/pessoas/lista_pessoas?tipo=Professor">Professores</NuxtLink>
+
+    </div>
+
+
     <div>
       <input class="form-control mt-2 mb-2" id="myInput" type="text" 
       placeholder="Filtrar.." v-model="filtro">
@@ -79,15 +115,16 @@
 </template>
 
 <script setup lang="ts">
-//import { useMensagem } from '~/composable/useMensagem';
 
 // Verifica se esta logado
 //definePageMeta({
 //  middleware: ['authenticated']
 //})
 
+// Mensagem composable
+const { setMensagem } = useMensagem();
+
 const { user } = useUserSession()
-//const { mensagem, tipo, limparMensagem } = useMensagem();
 const route = useRoute();
 
 const mesCorrente = new Date().getMonth() + 1;
@@ -113,21 +150,38 @@ const endpoint = computed(() => {
   return '/api/pessoas';
 });
 
+const localMessage = ref('');
+const localMessageType = ref<'success' | 'error' | 'info'>('info');
+function showMessage(text: string, type: 'success' | 'error' | 'info' = 'info') {
+  localMessage.value = text;
+  localMessageType.value = type;
+  // keep existing global composable for consistency
+  setMensagem(text, type === 'error' ? 'error' : 'success');
+}
+
+
 // Busca os dados através da API route do servidor
 // O watch: ['endpoint'] faz o refetch automático quando a rota mudar
 const { data, pending, error, refresh } = 
   useFetch<{ sucesso: boolean; mensagem?: string; dados?: any[] }>(endpoint);
 
+if (error.value) {
+  console.error('Erro ao buscar pessoas:', error.value);
+} else {
+//  const mensagem = 'Pessoas carregadas com sucesso.';
+//  showMessage(mensagem, 'info');
+}
+
 // Computed para o título do filtro aplicado
 const tituloFiltro = computed(() => {
-  /*
+  
   const query = route.query;
   
   if (query.situacao === 'Ativo') return 'Lista de pessoas em atividade.';
-  if (query.situacao === 'Inativo') return 'Lista de pessoas inativas.';
+  if (query.situacao === 'inativo') return 'Lista de pessoas inativas.';
   if (query.mes) return 'Lista de aniversariantes do mês.';
   if (query.tipo === 'Professor') return 'Lista de professores.';
-  */
+  
   if (filtro.value && filtro.value.length > 1) 
     return `Exibindo pessoas pelo filtro ${filtro.value}.`;
   return 'Lista de todas as pessoas.';

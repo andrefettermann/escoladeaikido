@@ -45,7 +45,7 @@
 <script lang="ts" setup>
 import { useUserSession } from '#imports';
 import { reactive } from 'vue';
-import { useMensagem } from '~/composable/useMensagem';
+import { useMensagem } from '~/composables/useMensagem';
 
 const { fetch: refreshSession } = useUserSession()
 

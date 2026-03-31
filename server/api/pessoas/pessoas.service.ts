@@ -125,6 +125,68 @@ export async function buscaTodos(): Promise<Resposta> {
   }
 };
 
+export async function buscaSituacao(situacao: string): Promise<Resposta> {
+    try {
+        const response = await PessoasRepository.findBySituacao(situacao);
+
+        if (!response || !response.sucesso) {
+            return {
+                sucesso: false,
+                mensagem: 'Nenhuma pessoa encontrada!',
+            };
+        }
+
+        /*
+        const pessoas = response.docs?.filter((pessoa) => {
+            if (situacao === 'ativo') {
+                return pessoa.is_ativo === true;
+            } else if (situacao === 'inativos') {
+                return pessoa.is_ativo === false;
+            }
+            return false;
+        }).map((pessoa) => (
+            {
+                id: pessoa._id,
+                aniversario: pessoa.aniversario,
+                matricula: pessoa.matricula,
+                nome: decripta(pessoa.nome),
+                cpf: pessoa.cpf? decripta(pessoa.cpf):'',
+                is_ativo: pessoa.is_ativo,
+                dojo: pessoa.dojo?.[0],
+                graduacao: pessoa.graduacao?.[0],
+                tipo: pessoa.tipo,
+            }
+        ));
+        */
+
+        const pessoas = response.docs?.map((pessoa) => (
+        {
+          id: pessoa._id,
+          aniversario: pessoa.aniversario,
+          matricula: pessoa.matricula,
+          nome: decripta(pessoa.nome),
+          cpf: pessoa.cpf? decripta(pessoa.cpf):'',
+          is_ativo: pessoa.is_ativo,
+          dojo: pessoa.dojo?.[0],
+          graduacao: pessoa.graduacao?.[0],
+          tipo: pessoa.tipo,
+        }));
+
+        return {
+            sucesso: true,
+            docs: ordena(pessoas),
+        };
+    } catch (error) {
+        console.error("Erro ao buscar pessoas por situação:", error);
+        return {
+            sucesso: false,
+            docs: [],
+            mensagem: 'Erro ao buscar as pessoas por situação.',
+        };
+    } 
+}
+
+
 function trataException(exception: any): string {
     var mensagem = '';
     if (exception.name === 'ValidationError') {

@@ -11,7 +11,7 @@
 
     <footer class="d-flex flex-wrap justify-content-between align-items-center py-3 my-4 border-top"> 
         <div class="col-md-4 d-flex align-items-center"> 
-            <span class="mb-3 mb-md-0 text-body-secondary">2025 - Escola de Aikidô</span>
+            <span class="mb-3 mb-md-0 text-body-secondary">2026 - Escola de Aikidô</span>
         </div> 
         <ul class="nav col-md-4 justify-content-end list-unstyled d-flex"></ul> 
     </footer>
@@ -21,7 +21,6 @@
 
 
 <script setup lang="ts">
-    import { useMensagem } from '~/composable/useMensagem';
     const { user , clear: clearSession, loggedIn } = useUserSession()
 
     async function logout () {
