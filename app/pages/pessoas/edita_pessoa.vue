@@ -163,7 +163,7 @@
                   <div v-if="carregandoDojos">Carregando...</div>
                   <select
                     v-else
-                    id="id_dojo" name="id_dojo" v-model="pessoa.dojoId"
+                    id="id_dojo" name="id_dojo" v-model="pessoa.dojo._id"
                     class="form-select">
                     <option value="">Selecione...</option>
                     <option v-for="item in itemsDojos" :key="item.value" 
@@ -277,7 +277,9 @@ const id = (query.id as string) || '';
 
 const title = id ? 'Edita Pessoa' : 'Nova Pessoa';
 
+//
 // Busca a pessoa se id for fornecido
+//
 const { pessoa, loading, error } = await usePessoa(id);
 if (error.value) {
   const mensagem = error.value.data?.message 
@@ -432,7 +434,7 @@ async function grava() {
 }
 
 //
-// Função para adicionar nova promoção
+// Função para adicionar promoção
 //
 const adicionarPromocao = () => {
   // Inicializa o array se não existir

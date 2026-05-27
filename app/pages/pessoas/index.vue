@@ -27,8 +27,8 @@
           to="/pessoas">Todos</NuxtLink>
         
         <NuxtLink id="ativas" name="ativas" 
-          class="btn btn-primary btn-sm m-1 disabled" 
-          to="/pessoas/lista_pessoas?situacao=Ativo">Em atividade</NuxtLink>
+          class="btn btn-primary btn-sm m-1" 
+          to="/pessoas?situacao=ativo">Em atividade</NuxtLink>
 
         <NuxtLink id="inativas" name="inativas" 
           class="btn btn-primary btn-sm m-1" 
@@ -36,13 +36,13 @@
 
         <NuxtLink id="aniversariantes" 
           name="aniversariantes" 
-          class="btn btn-primary btn-sm m-1 disabled" 
-          :to="`/pessoas/lista_pessoas?mes=${mesCorrente}`">Aniversariantes do mês
+          class="btn btn-primary btn-sm m-1" 
+          :to="`/pessoas?mes=${mesCorrente}`">Aniversariantes do mês
         </NuxtLink>
 
         <NuxtLink id="professores" name="professores" 
-          class="btn btn-primary btn-sm m-1 disabled" 
-          to="/pessoas/lista_pessoas?tipo=Professor">Professores</NuxtLink>
+          class="btn btn-primary btn-sm m-1" 
+          to="/pessoas?tipo=professor">Professores</NuxtLink>
 
     </div>
 
@@ -117,9 +117,9 @@
 <script setup lang="ts">
 
 // Verifica se esta logado
-//definePageMeta({
-//  middleware: ['authenticated']
-//})
+definePageMeta({
+  middleware: ['authenticated']
+})
 
 // Mensagem composable
 const { setMensagem } = useMensagem();
@@ -139,8 +139,8 @@ const endpoint = computed(() => {
   if (query.mes) {
     return `/api/pessoas/aniversariantes/${query.mes}`;
   }
-  if (query.tipo === 'Professor') {
-    return `/api/pessoas/professores`;
+  if (query.tipo === 'professor') {
+    return `/api/pessoas/tipo/${query.tipo.toLowerCase()}`;
   }
   if (query.id) {
     return `/api/pessoas/id/${query.id}`;
@@ -177,10 +177,10 @@ const tituloFiltro = computed(() => {
   
   const query = route.query;
   
-  if (query.situacao === 'Ativo') return 'Lista de pessoas em atividade.';
+  if (query.situacao === 'ativo') return 'Lista de pessoas em atividade.';
   if (query.situacao === 'inativo') return 'Lista de pessoas inativas.';
   if (query.mes) return 'Lista de aniversariantes do mês.';
-  if (query.tipo === 'Professor') return 'Lista de professores.';
+  if (query.tipo === 'professor') return 'Lista de professores.';
   
   if (filtro.value && filtro.value.length > 1) 
     return `Exibindo pessoas pelo filtro ${filtro.value}.`;

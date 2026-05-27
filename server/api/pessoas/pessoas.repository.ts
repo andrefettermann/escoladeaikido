@@ -187,14 +187,123 @@ export async function findBySituacao(situacao: string): Promise<Resposta> {
   }
 }
 
-export async function update(id: string, dados: any): Promise<Resposta> {
+export async function findByMesAniversario(mes: string): Promise<Resposta> {
+  const pipeline = [
+//      {
+//          $addFields: {
+//              mes_aniversario: { $month: "$aniversario" }
+//          }
+//      },
+      
+      { $match: {'aniversario': { $regex: mes + '$', $options: 'i' }} },
+      lookupDojo,
+      lookupGraduacao,
+      {
+          $project: {
+              _id: 1,
+              nome: 1,
+              aniversario: 1,
+              matricula: 1,
+              is_ativo: 1,
+              dojo: 1,
+              graduacao: 1
+          } 
+      },
+  ];
 
+  try {
+      const response = await PessoaSchema.aggregate(pipeline)
+          .allowDiskUse(true)
+          .option({ maxTimeMS: 15000 })
+          .exec();
+
+      if (!response || response.length === 0) {
+          return {
+              sucesso: false,
+              mensagem: 'Nenhuma pessoa encontrada para o mês informado.',
+          };
+      }
+
+      return {
+          sucesso: true,
+          docs: response,
+      };
+  } catch (error) {
+      console.error("Erro ao buscar pessoas por mês de aniversário:", error);
+      return {
+          sucesso: false,
+          docs: [],
+          mensagem: 'Erro ao buscar as pessoas por mês de aniversário.',
+      };
+  }
+}
+
+export async function findByTipo(tipo: string): Promise<Resposta> {
+  const pipeline = [
+      { $match: { tipo: tipo } },
+      lookupDojo,
+      lookupGraduacao,
+      {
+          $project: {
+              _id: 1,
+              nome: 1,
+              aniversario: 1,
+              matricula: 1,
+              is_ativo: 1,
+              dojo: 1,
+              graduacao: 1,
+              tipo: 1
+          } 
+      },
+    ];
+
+  try {
+      const response = await PessoaSchema.aggregate(pipeline)
+          .allowDiskUse(true)
+          .option({ maxTimeMS: 15000 })
+          .exec();
+
+      if (!response || response.length === 0) {
+          return {
+              sucesso: false,
+              mensagem: 'Nenhuma pessoa encontrada para o tipo informado.',
+          };
+      }
+
+      const pessoas = response.map((pessoa) => (
+      {
+        id: pessoa._id,
+        aniversario: pessoa.aniversario,
+        matricula : pessoa.matricula,
+        nome: decripta(pessoa.nome),
+        cpf: pessoa.cpf? decripta(pessoa.cpf):'',
+        is_ativo: pessoa.is_ativo,
+        dojo: pessoa.dojo?.[0],
+        graduacao: pessoa.graduacao?.[0],
+        tipo: pessoa.tipo,
+      }));
+
+      return {
+          sucesso: true,
+          docs: response,
+      };
+  } catch (error) {
+      console.error("Erro ao buscar pessoas por tipo:", error);
+      return {
+          sucesso: false,
+          docs: [],
+          mensagem: 'Erro ao buscar as pessoas por tipo.',
+      };
+  }
+}
+
+export async function update(id: string, dados: any): Promise<Resposta> {
   try {
     const response = await PessoaSchema.findByIdAndUpdate(
         {"_id": id},
         dados,
         {
-            new: true,
+            returnDocument: 'after',
             runValidators: true
         }
     )

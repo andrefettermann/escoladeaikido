@@ -1,4 +1,5 @@
 import { defineMongooseModel } from '#nuxt/mongoose'
+import { Schema } from 'mongoose'
 
 export const PessoaSchema = defineMongooseModel({
     name: 'pessoas',
@@ -36,12 +37,12 @@ export const PessoaSchema = defineMongooseModel({
             required: [true, 'O tipo é obrigatório.'],
         },
         id_dojo: {
-            type: String as any,
+            type: Schema.Types.ObjectId as any,
             default: null,
             required: false
         },
         id_graduacao: {
-            type: String as any,
+            type: Schema.Types.ObjectId as any,
             default: null,
             required: false
         },

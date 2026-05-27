@@ -1,5 +1,17 @@
 export const usePessoa = async (id: MaybeRef<string>) => {
 
+    interface Pagamento {
+        data: string;
+        id_taxa: string;
+        valor_devido: number;
+        valor_pago: number;
+        data_pagamento: Date;
+        data_vencimento: Date;
+        forma_pagamento: string;
+        situacao: string;
+        observacoes: string;
+    }
+
     interface Promocao {
         data: string;
         id_graduacao: string;
@@ -27,6 +39,7 @@ export const usePessoa = async (id: MaybeRef<string>) => {
         sequencia: number;
     };
     promocoes: Promocao[];
+    pagamentos: Pagamento[];
     }
 
   const pessoa = reactive<Pessoa & { dojoId: string }>({
@@ -50,12 +63,13 @@ export const usePessoa = async (id: MaybeRef<string>) => {
         faixa: '',
         sequencia: 0
     },
-    promocoes: []
+    promocoes: [],
+    pagamentos: []
 });
 
   const pessoaId = ref(id);
   
- const { data, error, loading, refresh } = useCustomFetch(
+  const { data, error, loading, refresh } = useCustomFetch(
     computed(() => `/api/pessoas/${unref(pessoaId)}`),
     {
       onSuccess: (response: any) => {

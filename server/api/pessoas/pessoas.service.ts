@@ -126,66 +126,118 @@ export async function buscaTodos(): Promise<Resposta> {
 };
 
 export async function buscaSituacao(situacao: string): Promise<Resposta> {
-    try {
-        const response = await PessoasRepository.findBySituacao(situacao);
+  try {
+      const response = await PessoasRepository.findBySituacao(situacao);
 
-        if (!response || !response.sucesso) {
-            return {
-                sucesso: false,
-                mensagem: 'Nenhuma pessoa encontrada!',
-            };
-        }
+      if (!response || !response.sucesso) {
+          return {
+              sucesso: false,
+              mensagem: 'Nenhuma pessoa encontrada!',
+          };
+      }
 
-        /*
-        const pessoas = response.docs?.filter((pessoa) => {
-            if (situacao === 'ativo') {
-                return pessoa.is_ativo === true;
-            } else if (situacao === 'inativos') {
-                return pessoa.is_ativo === false;
-            }
-            return false;
-        }).map((pessoa) => (
-            {
-                id: pessoa._id,
-                aniversario: pessoa.aniversario,
-                matricula: pessoa.matricula,
-                nome: decripta(pessoa.nome),
-                cpf: pessoa.cpf? decripta(pessoa.cpf):'',
-                is_ativo: pessoa.is_ativo,
-                dojo: pessoa.dojo?.[0],
-                graduacao: pessoa.graduacao?.[0],
-                tipo: pessoa.tipo,
-            }
-        ));
-        */
+      const pessoas = response.docs?.map((pessoa) => (
+      {
+        id: pessoa._id,
+        aniversario: pessoa.aniversario,
+        matricula: pessoa.matricula,
+        nome: decripta(pessoa.nome),
+        cpf: pessoa.cpf? decripta(pessoa.cpf):'',
+        is_ativo: pessoa.is_ativo,
+        dojo: pessoa.dojo?.[0],
+        graduacao: pessoa.graduacao?.[0],
+        tipo: pessoa.tipo,
+      }));
 
-        const pessoas = response.docs?.map((pessoa) => (
-        {
-          id: pessoa._id,
-          aniversario: pessoa.aniversario,
-          matricula: pessoa.matricula,
-          nome: decripta(pessoa.nome),
-          cpf: pessoa.cpf? decripta(pessoa.cpf):'',
-          is_ativo: pessoa.is_ativo,
-          dojo: pessoa.dojo?.[0],
-          graduacao: pessoa.graduacao?.[0],
-          tipo: pessoa.tipo,
-        }));
-
-        return {
-            sucesso: true,
-            docs: ordena(pessoas),
-        };
-    } catch (error) {
-        console.error("Erro ao buscar pessoas por situação:", error);
-        return {
-            sucesso: false,
-            docs: [],
-            mensagem: 'Erro ao buscar as pessoas por situação.',
-        };
-    } 
+      return {
+          sucesso: true,
+          docs: ordena(pessoas),
+      };
+  } catch (error) {
+      console.error("Erro ao buscar pessoas por situação:", error);
+      return {
+          sucesso: false,
+          docs: [],
+          mensagem: 'Erro ao buscar as pessoas por situação.',
+      };
+  } 
 }
 
+export async function buscaAniversariantes(mes: string): Promise<Resposta> {
+  try {
+      const response = await PessoasRepository.findByMesAniversario(mes);
+
+      if (!response || !response.sucesso) {
+          return {
+              sucesso: false,
+              mensagem: 'Nenhuma pessoa encontrada!',
+          };
+      }
+
+      const pessoas = response.docs?.map((pessoa) => (
+      {
+        id: pessoa._id,
+        aniversario: pessoa.aniversario,
+        matricula: pessoa.matricula,
+        nome: decripta(pessoa.nome),
+        cpf: pessoa.cpf? decripta(pessoa.cpf):'',
+        is_ativo: pessoa.is_ativo,
+        dojo: pessoa.dojo?.[0],
+        graduacao: pessoa.graduacao?.[0],
+        tipo: pessoa.tipo,
+      }));
+
+      return {
+          sucesso: true,
+          docs: ordena(pessoas),
+      };
+  } catch (error) {
+      console.error("Erro ao buscar pessoas por mês de aniversário:", error);
+      return {
+          sucesso: false,
+          docs: [],
+          mensagem: 'Erro ao buscar as pessoas por mês de aniversário.',
+      };
+  } 
+}
+
+export async function buscaTipo(tipo: string): Promise<Resposta> {
+  try {
+      const response = await PessoasRepository.findByTipo(tipo);
+
+      if (!response || !response.sucesso) {
+          return {
+              sucesso: false,
+              mensagem: 'Nenhuma pessoa encontrada!',
+          };
+      }
+
+      const pessoas = response.docs?.map((pessoa) => (
+      {
+        id: pessoa._id,
+        aniversario: pessoa.aniversario,
+        matricula: pessoa.matricula,
+        nome: decripta(pessoa.nome),
+        cpf: pessoa.cpf? decripta(pessoa.cpf):'',
+        is_ativo: pessoa.is_ativo,
+        dojo: pessoa.dojo?.[0],
+        graduacao: pessoa.graduacao?.[0],
+        tipo: pessoa.tipo,
+      }));
+
+      return {
+          sucesso: true,
+          docs: ordena(pessoas),
+      };
+  } catch (error) {
+      console.error("Erro ao buscar pessoas por tipo:", error);
+      return {
+          sucesso: false,
+          docs: [],
+          mensagem: 'Erro ao buscar as pessoas por tipo.',
+      };
+  } 
+}
 
 function trataException(exception: any): string {
     var mensagem = '';
@@ -225,8 +277,8 @@ function preparaDadosGravacao(osDados: any): any {
         'data_inicio_aikido': osDados.data_inicio,
         'data_matricula': osDados.data_matricula,
         'tipo': osDados.tipo,
-        'id_dojo': osDados.id_dojo == ''?null:osDados.id_dojo,
-        'id_graduacao': osDados.id_graduacao,
+        'id_dojo': osDados.dojo._id == ''?null:osDados.dojo._id,
+        'id_graduacao': osDados.graduacao._id == ''?null:osDados.graduacao._id,
         'promocoes': docsPromocoes,
     }
 
