@@ -72,6 +72,13 @@ export async function buscaPeloId(id: string): Promise<Resposta> {
           }))
         ,
         tipo: response.doc.tipo,
+        cobrancas: response.doc.cobrancas?.map((cobranca: 
+          { _id: any; valor: any; data_vencimento: any; situacao: any; }) => ({
+          id: cobranca._id,
+          valor_devido: cobranca.valor,
+          data_vencimento: formataData(new Date(cobranca.data_vencimento)),
+          situacao: cobranca.situacao
+        }))
     }
 
     return {
@@ -314,3 +321,31 @@ export async function atualiza(event: any, id: string): Promise<Resposta> {
 
 }
 
+export async function cria(event: any): Promise<Resposta> {
+  const body = await readBody(event);
+  const dados = preparaDadosGravacao(body);
+
+  try {
+    const response = await PessoasRepository.create(dados);
+
+    if (!response || !response.sucesso) {
+        return {
+            'sucesso': false,
+            'mensagem': "Erro ao criar o registro",
+            'erro': "Registro não criado"
+        }
+    }
+
+    return {
+        sucesso: true,
+        doc: response.doc
+    }
+
+  } catch (error) {
+        return {
+            sucesso: false,
+            mensagem: trataException(error)
+        }
+    }
+
+}

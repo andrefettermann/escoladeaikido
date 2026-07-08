@@ -22,7 +22,7 @@
           <!-- Info Alert -->
           <div class="alert alert-info alert-dismissible fade show">
             <strong>Info!</strong> O '*'' indica os campos obrigatórios.
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
           </div>
 
           <!-- Mensagens -->
@@ -107,7 +107,7 @@
             </div>
             <div class="col-1">
               <input type="text" class="form-control" id="aniversario" name="aniversario" v-model="pessoa.aniversario"
-              placeholder="A data de aniversário(dd/mm)" aria-colcount="10" data-toggle="tooltip" data-placement="top" 
+              placeholder="A data de aniversário(dd/mm)" data-toggle="tooltip" data-placement="top" 
               title="A data de aniversário(dd/mm)">
             </div>
           </div>
@@ -281,15 +281,17 @@ const title = id ? 'Edita Pessoa' : 'Nova Pessoa';
 // Busca a pessoa se id for fornecido
 //
 const { pessoa, loading, error } = await usePessoa(id);
+
 if (error.value) {
   const mensagem = error.value.data?.message 
     || error.value.message 
     || 'Erro ao buscar pessoa.';
   showMessage(mensagem, 'error');
-} else {
-  const mensagem = 'Pessoa carregada com sucesso.';
-  showMessage(mensagem, 'info');
 } 
+//else {
+//  const mensagem = 'Pessoa carregada com sucesso.';
+//  showMessage(mensagem, 'info');
+//} 
 
 //
 // Busca as graduações para popular o select

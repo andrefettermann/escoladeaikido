@@ -102,8 +102,9 @@
                   <div class="card-header fw-bold">Cobranças</div>
                       <div class="card-body">
                         <ul id="lista" class="list-group mb-2">
-                          <li v-for="cobranca in pessoa.cobrancas" :key="cobranca.id_graduacao" class="list-group-item">
-                            {{ cobranca.data }} - {{ cobranca.nome_graduacao }}
+                          <li v-for="cobranca in pessoa.cobrancas" :key="cobranca.id_taxa" class="list-group-item">
+                            {{ cobranca.nome_taxa }} <br/>
+                            {{ cobranca.data_vencimento }} - {{ cobranca.valor_devido }} - {{ cobranca.situacao }}
                           </li>
                       </ul>
                     </div>

@@ -1,13 +1,10 @@
 export const usePessoa = async (id: MaybeRef<string>) => {
 
-    interface Pagamento {
-        data: string;
+    interface Cobranca {
         id_taxa: string;
+        nome_taxa: string;
         valor_devido: number;
-        valor_pago: number;
-        data_pagamento: Date;
         data_vencimento: Date;
-        forma_pagamento: string;
         situacao: string;
         observacoes: string;
     }
@@ -39,7 +36,7 @@ export const usePessoa = async (id: MaybeRef<string>) => {
         sequencia: number;
     };
     promocoes: Promocao[];
-    pagamentos: Pagamento[];
+    cobrancas: Cobranca[];
     }
 
   const pessoa = reactive<Pessoa & { dojoId: string }>({
@@ -64,7 +61,7 @@ export const usePessoa = async (id: MaybeRef<string>) => {
         sequencia: 0
     },
     promocoes: [],
-    pagamentos: []
+    cobrancas: []
 });
 
   const pessoaId = ref(id);

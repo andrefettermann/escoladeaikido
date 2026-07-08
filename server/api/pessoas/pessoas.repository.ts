@@ -35,12 +35,25 @@ const lookupGraduacao = {
     }
 }
 
+const lookupCobrancas = {
+    $lookup: {
+        from: 'cobrancas',
+        let: { pessoaId: "$_id" },
+        pipeline: [
+            { $match: { $expr: { $eq: ["$id_pessoa", "$$pessoaId"] } } },
+            { $project: { _id: 1, valor: 1, data_vencimento: 1, situacao: 1 } }
+        ],
+        as: 'cobrancas'
+    }
+} 
+
 export async function find(id: string): Promise<Resposta> {
   try {
     const pipeline = [
       { $match: { _id: new mongoose.Types.ObjectId(id) } },
       lookupDojo,
       lookupGraduacao,
+      lookupCobrancas,
       {
           $project: {
               _id: 1,
@@ -55,6 +68,7 @@ export async function find(id: string): Promise<Resposta> {
               promocoes: 1,
               dojo: 1,
               graduacao: 1,
+            cobrancas: 1
           } 
       },
       { $limit: 1 }
@@ -328,4 +342,30 @@ export async function update(id: string, dados: any): Promise<Resposta> {
       }
   }
 
+}
+
+export async function create(dados: any): Promise<Resposta> {
+  try {
+    const pessoa = new PessoaSchema(dados);
+    const response = await pessoa.save();
+
+    if (!response) {
+      return {
+          'sucesso': false,
+          'mensagem': "Erro ao criar a pessoa",
+          'erro': "Registro não criado"
+      }
+    }
+
+    return {
+        sucesso: true,
+        doc: response
+    }
+
+  } catch (error) {
+      return {
+          sucesso: false,
+          mensagem: error instanceof Error ? error.message : 'Erro desconhecido ao criar pessoa.'
+      }
+  }
 }

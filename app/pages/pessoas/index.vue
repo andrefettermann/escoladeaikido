@@ -10,15 +10,10 @@
       <button type="button" class="btn-close" @click="localMessage = ''" aria-label="Fechar"></button>
     </div>
 
-    <figure>
-      <blockquote class="blockquote fs-2 fw-bold">
-        <p>Pessoas cadastradas</p>
-      </blockquote>
-      <figcaption class="blockquote-footer">
-        <span v-if="tituloFiltro"> {{ tituloFiltro }} 
-          Total encontrado: {{ pessoasFiltradas.length }}</span>
-      </figcaption>
-    </figure>
+    <div>
+      <h1 class="fs-3 fw-bold">Pessoas cadastradas</h1>
+      <p class="fs-6 text-secondary">Gerencie as pessoas cadastradas na escola, incluindo alunos, professores e outros membros.</p>
+    </div>
 
     <div class="mb-2">
 
@@ -49,8 +44,11 @@
 
     <div>
       <input class="form-control mt-2 mb-2" id="myInput" type="text" 
-      placeholder="Filtrar.." v-model="filtro">
+      placeholder="Filtrar.." v-model="filtro" aria-label="Filtrar as pessoas exibidas" />
     </div>
+
+    <span v-if="tituloFiltro"> {{ tituloFiltro }} 
+        Total encontrado: {{ pessoasFiltradas.length }}</span>
 
     <div v-if="pending" class="text-center">
       <p class="mb-4">Carregando dados...</p>
@@ -75,35 +73,70 @@
         </nuxt-link>
       </div>
 
-      <ul id="lista" class="list-group mb-2">
-        <li v-for="pessoa in pessoasFiltradas" :key="pessoa.id" class="list-group-item">
 
-          <h5 v-if="!pessoa.is_ativo" class="text-decoration-line-through">{{ pessoa.nome }}</h5>
-          <h5 v-if="pessoa.is_ativo" >{{ pessoa.nome }}</h5>
-          
-          <p class="fs-6 text-secondary">
-            {{ pessoa.matricula?pessoa.matricula:'N/A' }} | 
+      <div class="table-responsive" role="region" aria-label="Tabela de pessoas" tabindex="0">
 
-            {{ pessoa.graduacao.nome }}
-            
-            | {{ pessoa.is_ativo ? 'Em atividade' : 'Inativo' }} | {{ pessoa.aniversario }} | 
-            {{ pessoa.dojo?.nome?pessoa.dojo?.nome:'N/A' }}
-          </p>
-          <div v-if="(user as any)?.role!='admin'" class="flex gap-2">
-            <nuxt-link id="detalhes_pessoa" name="detalhes_pessoa" 
-              class="btn btn-primary btn-sm m-1" 
-              :to="`/pessoas/detalhes_pessoa?id=${pessoa.id}`">
-              Detalhes
-            </nuxt-link>
+        <table id="lista" class="table table-striped table-hover align-middle">
+          <caption class="visually-hidden">
+            Lista de pessoas cadastradas, com nome, matrícula, graduação, status, aniversário, dojo e ações disponíveis
+          </caption>
+          <thead>
+            <tr>
+              <th scope="col">Nome</th>
+              <th scope="col">Matrícula</th>
+              <th scope="col">Graduação</th>
+              <th scope="col">Status</th>
+              <th scope="col">Aniversário</th>
+              <th scope="col">Dojo</th>
+              <th scope="col">Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-if="pessoasFiltradas.length === 0">
+              <td colspan="7" class="text-center text-secondary py-3">
+                Nenhuma pessoa encontrada
+              </td>
+            </tr>
+            <tr v-for="pessoa in pessoasFiltradas" :key="pessoa.id">
+              <th scope="row">
+                <span :class="{ 'text-decoration-line-through': !pessoa.is_ativo }" class="fs-6 fw-semibold">
+                  {{ pessoa.nome }}
+                </span>
+              </th>
+              <td>{{ pessoa.matricula ? pessoa.matricula : 'N/A' }}</td>
+              <td>{{ pessoa.graduacao.nome }}</td>
+              <td>
+                <span class="badge" :class="pessoa.is_ativo ? 'bg-success' : 'bg-secondary'">
+                  {{ pessoa.is_ativo ? 'Em atividade' : 'Inativo' }}
+                </span>
+              </td>
+              <td>{{ pessoa.aniversario }}</td>
+              <td>{{ pessoa.dojo?.nome ? pessoa.dojo?.nome : 'N/A' }}</td>
+              <td>
+                <div v-if="(user as any)?.role != 'admin'" class="d-flex gap-2">
+                  <nuxt-link
+                    :id="`detalhes_pessoa_${pessoa.id}`"
+                    class="btn btn-primary btn-sm"
+                    :to="`/pessoas/detalhes_pessoa?id=${pessoa.id}`"
+                    :aria-label="`Ver detalhes de ${pessoa.nome}`"
+                  >
+                    Ver detalhes
+                  </nuxt-link>
+                  <nuxt-link
+                    :id="`edita_pessoa_${pessoa.id}`"
+                    class="btn btn-primary btn-sm"
+                    :to="{ path: '/pessoas/edita_pessoa', query: { id: pessoa.id } }"
+                    :aria-label="`Editar dados de ${pessoa.nome}`"
+                  >
+                    Editar os dados
+                  </nuxt-link>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
 
-            <nuxt-link id="edita_pessoa" name="edita_pessoa" 
-              class="btn btn-primary btn-sm m-1" 
-              :to="{ path: '/pessoas/edita_pessoa', query: { id: pessoa.id } }">
-              Edita
-            </nuxt-link>
-          </div>
-        </li>
-      </ul>
     </div>
 
     <div v-else-if="!pending && !error">
