@@ -34,49 +34,85 @@
     
       <div class="mb-2">
         <nuxt-link id="novo_dojo" name="novo_dojo" 
-            class="btn btn-success btn-sm m-1" href="/dojos/edita_dojo">
-              Incluir dojo
-        </nuxt-link>
+          class="btn btn-success btn-sm m-1" href="/dojos/edita_dojo">
+          Incluir dojo</nuxt-link>
+
+        <NuxtLink id="todos" name="todos" 
+          class="btn btn-primary btn-sm m-1" 
+          to="/dojos">Todos</NuxtLink>
+
+        <NuxtLink id="ativos" name="ativos" 
+          class="btn btn-primary btn-sm m-1" 
+          to="/dojos?situacao=ativo">Em atividade</NuxtLink>
+
+        <NuxtLink id="inativos" name="inativos" 
+          class="btn btn-primary btn-sm m-1" 
+          to="/dojos?situacao=inativo">Inativos</NuxtLink>
+
       </div>
 
-      <ul id="lista" class="list-group mb-2">
-        <li v-for="dojo in dojosFiltrados" :key="dojo.id" class="list-group-item">
-          <h5 v-if="!dojo.is_ativo" class="text-decoration-line-through">{{ dojo.nome }}</h5>
-          <div class="fs-6 text-secondary">
-            {{ dojo.local?dojo.local:'N/A' }} -  
-            {{ dojo.endereco ? dojo.endereco : 'N/A' }} -
-            {{ dojo.cidade ? dojo.cidade : 'N/A' }}  
-            ({{ dojo.uf ? dojo.uf : 'N/A' }}) -
-            {{  dojo.is_ativo ? 'Ativo' : 'Inativo' }}
-          </div>
-            
-          <div v-for="professor in dojo.professores" :key="professor.id_professor">
-            {{ professor ? professor.horarios : 'N/A' }} -
-            {{ professor ? professor.nome : 'N/A' }} <br/>          
-          </div>
-          
-          <div v-if="(user as any)?.role!='admin'" class="flex gap-2">
-            <nuxt-link 
-              id="detalhes_dojo" 
-              name="detalhes_dojo" 
-              class="btn btn-primary btn-sm m-1" 
-              :to="`/dojos/detalhes_dojo?id=${dojo.id}`">
-              Detalhes
-            </nuxt-link>
-            <nuxt-link 
-              id="bota_editar_dojo" 
-              name="botao_editar_dojo" 
-              class="btn btn-primary btn-sm m-1" 
-              :to="`/dojos/edita_dojo?id=${dojo.id}`">
-              Editar
-            </nuxt-link>
-          </div>
-        </li>
-      </ul>
+      <div class="table-responsive" role="region" aria-label="Tabela de dojos" tabindex="0">
+
+        <table id="lista" class="table table-striped table-hover align-middle">
+          <caption class="visually-hidden">
+            Lista de dojos cadastrados, com nome, matrícula, graduação, status, aniversário, dojo e ações disponíveis
+          </caption>
+          <thead>
+            <tr>
+              <th scope="col">Nome</th>
+              <th scope="col">Local</th>
+              <th scope="col">Endereço</th>
+              <th scope="col">Cidade</th>
+              <th scope="col">UF</th>
+              <th scope="col">Situação</th>
+              <th scope="col">Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-if="dojosFiltrados.length === 0">
+              <td colspan="7" class="text-center text-secondary py-3">
+                Nenhum dojo encontrado
+              </td>
+            </tr>
+            <tr v-for="dojo in dojosFiltrados" :key="dojo.id">
+              <th scope="row">
+                <span :class="{ 'text-decoration-line-through': !dojo.is_ativo }" class="fs-6 fw-semibold">
+                  {{ dojo.nome }}
+                </span>
+              </th>
+              <td>{{ dojo.local }}</td>
+              <td>{{ dojo.endereco }}</td>
+              <td>{{ dojo.cidade }}</td>
+              <td>{{ dojo.uf }}</td>
+              <td>
+                <span class="badge" :class="dojo.is_ativo ? 'bg-success' : 'bg-secondary'">
+                  {{ dojo.is_ativo ? 'Em atividade' : 'Inativo' }}
+                </span>
+              </td>
+              <td>
+                <div v-if="(user as any)?.role != 'admin'" class="d-flex gap-2">
+                  <nuxt-link
+                    :id="`detalhes_dojo_${dojo.id}`"
+                    class="link-primary fw-semibold"
+                    :to="`/dojos/detalhes_dojo?id=${dojo.id}`"
+                    :aria-label="`Ver detalhes de ${dojo.nome}`">Ver</nuxt-link>
+
+                  <nuxt-link
+                    :id="`edita_dojo_${dojo.id}`"
+                    class="link-primary fw-semibold"
+                    :to="{ path: '/dojos/edita_dojo', query: { id: dojo.id } }"
+                    :aria-label="`Editar dados de ${dojo.nome}`">Editar</nuxt-link>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
     </div>
 
     <div v-else-if="!pending && !error">
-      <p class="fs-3 fw-bold">Nenhuma dojo encontrado.</p>
+      <p class="fs-3 fw-bold">Nenhum dojo encontrado.</p>
     </div>
 
   </div>
@@ -85,21 +121,24 @@
 
 <script setup lang="ts">
 // Verifica se esta logado
-//definePageMeta({
-//  middleware: ['authenticated']
-//})
+definePageMeta({
+  middleware: ['authenticated']
+})
 
 const { user } = useUserSession()
+const route = useRoute();
 /*
 const { mensagem, tipo, limparMensagem } = useMensagem();
-const route = useRoute();
-
-const mesCorrente = new Date().getMonth() + 1;
 */
 
 // Computed para determinar qual endpoint usar baseado nos query params
 const endpoint = computed(() => {
-  // Endpoint padrão (todos os dojos)
+  const query = route.query;
+  
+  if (query.situacao) {
+    return `/api/dojos/${query.situacao}`;
+  }
+
   return '/api/dojos';
 });
 
@@ -110,6 +149,14 @@ const { data, pending, error, refresh } =
 
 // Computed para o título do filtro aplicado
 const tituloFiltro = computed(() => {
+  const query = route.query;
+  
+  if (query.situacao === 'ativo') return 'Lista de dojos em atividade.';
+  if (query.situacao === 'inativo') return 'Lista de dojos inativos.';
+  
+  if (filtro.value && filtro.value.length > 1) 
+    return `Exibindo dojos pelo filtro ${filtro.value}.`;
+
   return 'Lista de todos os dojos.';
 });
 

@@ -15,33 +15,6 @@
       <p class="fs-6 text-secondary">Gerencie as pessoas cadastradas na escola, incluindo alunos, professores e outros membros.</p>
     </div>
 
-    <div class="mb-2">
-
-        <NuxtLink id="todas" name="todas" 
-          class="btn btn-primary btn-sm m-1" 
-          to="/pessoas">Todos</NuxtLink>
-        
-        <NuxtLink id="ativas" name="ativas" 
-          class="btn btn-primary btn-sm m-1" 
-          to="/pessoas?situacao=ativo">Em atividade</NuxtLink>
-
-        <NuxtLink id="inativas" name="inativas" 
-          class="btn btn-primary btn-sm m-1" 
-          to="/pessoas?situacao=inativo">Inativas</NuxtLink>
-
-        <NuxtLink id="aniversariantes" 
-          name="aniversariantes" 
-          class="btn btn-primary btn-sm m-1" 
-          :to="`/pessoas?mes=${mesCorrente}`">Aniversariantes do mês
-        </NuxtLink>
-
-        <NuxtLink id="professores" name="professores" 
-          class="btn btn-primary btn-sm m-1" 
-          to="/pessoas?tipo=professor">Professores</NuxtLink>
-
-    </div>
-
-
     <div>
       <input class="form-control mt-2 mb-2" id="myInput" type="text" 
       placeholder="Filtrar.." v-model="filtro" aria-label="Filtrar as pessoas exibidas" />
@@ -71,6 +44,29 @@
             class="btn btn-success btn-sm m-1" href="/pessoas/edita_pessoa">
               Incluir pessoa
         </nuxt-link>
+
+        <NuxtLink id="todas" name="todas" 
+          class="btn btn-primary btn-sm m-1" 
+          to="/pessoas">Todos</NuxtLink>
+        
+        <NuxtLink id="ativas" name="ativas" 
+          class="btn btn-primary btn-sm m-1" 
+          to="/pessoas?situacao=ativo">Em atividade</NuxtLink>
+
+        <NuxtLink id="inativas" name="inativas" 
+          class="btn btn-primary btn-sm m-1" 
+          to="/pessoas?situacao=inativo">Inativas</NuxtLink>
+
+        <NuxtLink id="aniversariantes" 
+          name="aniversariantes" 
+          class="btn btn-primary btn-sm m-1" 
+          :to="`/pessoas?mes=${mesCorrente}`">Aniversariantes do mês
+        </NuxtLink>
+
+        <NuxtLink id="professores" name="professores" 
+          class="btn btn-primary btn-sm m-1" 
+          to="/pessoas?tipo=professor">Professores</NuxtLink>
+
       </div>
 
 
@@ -85,7 +81,7 @@
               <th scope="col">Nome</th>
               <th scope="col">Matrícula</th>
               <th scope="col">Graduação</th>
-              <th scope="col">Status</th>
+              <th scope="col">Situação</th>
               <th scope="col">Aniversário</th>
               <th scope="col">Dojo</th>
               <th scope="col">Ações</th>
@@ -116,19 +112,19 @@
                 <div v-if="(user as any)?.role != 'admin'" class="d-flex gap-2">
                   <nuxt-link
                     :id="`detalhes_pessoa_${pessoa.id}`"
-                    class="btn btn-primary btn-sm"
+                    class="link-primary fw-semibold"
                     :to="`/pessoas/detalhes_pessoa?id=${pessoa.id}`"
                     :aria-label="`Ver detalhes de ${pessoa.nome}`"
                   >
-                    Ver detalhes
+                    Ver
                   </nuxt-link>
                   <nuxt-link
                     :id="`edita_pessoa_${pessoa.id}`"
-                    class="btn btn-primary btn-sm"
+                    class="link-primary fw-semibold"
                     :to="{ path: '/pessoas/edita_pessoa', query: { id: pessoa.id } }"
                     :aria-label="`Editar dados de ${pessoa.nome}`"
                   >
-                    Editar os dados
+                    Editar
                   </nuxt-link>
                 </div>
               </td>
