@@ -34,7 +34,7 @@
     
       <div class="mb-2">
         <nuxt-link id="novo_dojo" name="novo_dojo" 
-          class="btn btn-success btn-sm m-1" href="/dojos/edita_dojo">
+          class="btn btn-success btn-sm m-1" href="/dojos/edita">
           Incluir dojo</nuxt-link>
 
         <NuxtLink id="todos" name="todos" 
@@ -94,13 +94,13 @@
                   <nuxt-link
                     :id="`detalhes_dojo_${dojo.id}`"
                     class="link-primary fw-semibold"
-                    :to="`/dojos/detalhes_dojo?id=${dojo.id}`"
+                    :to="{ path: '/dojos/detalhes', query: { id: dojo._id } }"
                     :aria-label="`Ver detalhes de ${dojo.nome}`">Ver</nuxt-link>
 
                   <nuxt-link
                     :id="`edita_dojo_${dojo.id}`"
                     class="link-primary fw-semibold"
-                    :to="{ path: '/dojos/edita_dojo', query: { id: dojo.id } }"
+                    :to="{ path: `/dojos/edita/${dojo._id}` }"
                     :aria-label="`Editar dados de ${dojo.nome}`">Editar</nuxt-link>
                 </div>
               </td>
@@ -136,7 +136,11 @@ const endpoint = computed(() => {
   const query = route.query;
   
   if (query.situacao) {
-    return `/api/dojos/${query.situacao}`;
+    return `/api/dojos/situacao/${query.situacao}`;
+  }
+
+  if (query.id) {
+    return `/api/dojos/id/${query.id}`;
   }
 
   return '/api/dojos';
@@ -145,7 +149,9 @@ const endpoint = computed(() => {
 // Busca os dados através da API route do servidor
 // O watch: ['endpoint'] faz o refetch automático quando a rota mudar
 const { data, pending, error, refresh } = 
-  useFetch<{ sucesso: boolean; mensagem?: string; dados?: any[] }>(endpoint);
+  useFetch<{ sucesso: boolean; mensagem?: string; docs?: any[] }>(endpoint);
+
+  
 
 // Computed para o título do filtro aplicado
 const tituloFiltro = computed(() => {
@@ -165,20 +171,21 @@ const filtro = ref('');
 
 // Computed property que filtra os dojos baseado no texto digitado
 const dojosFiltrados = computed(() => {
-  if (!data.value?.dados) return [];
+  if (!data.value?.docs) return [];
   
-  if (!filtro.value) return data.value.dados;
+  if (!filtro.value) return data.value.docs;
   
   const valorFiltro = filtro.value.toLowerCase();
   
-  return data.value.dados.filter((dojo: any) => {
+  return data.value.docs.filter((dojo: any) => {
     const textoCompleto = [
+      dojo._id,
       dojo.nome,
       dojo.local,
       dojo.endereco,
       dojo.cidade,
       dojo.uf,
-      dojo.professores,
+      dojo.horarios,
       dojo.is_ativo?'ativo':'inativo'
     ].join(' ').toLowerCase();
     

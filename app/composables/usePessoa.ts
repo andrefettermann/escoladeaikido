@@ -70,10 +70,10 @@ export const usePessoa = async (id: MaybeRef<string>) => {
     computed(() => `/api/pessoas/${unref(pessoaId)}`),
     {
       onSuccess: (response: any) => {
-        if (response?.dados) {
-          Object.assign(pessoa, response.dados);
-          pessoa.dojoId = response.dados?.dojo?._id || '';
-          console.log('Pessoa dojo:', response.dados?.dojo);
+        if (response?.docs) {
+          Object.assign(pessoa, response.docs);
+          pessoa.dojoId = response.docs?.dojo?._id || '';
+          console.log('Pessoa dojo:', response.docs?.dojo);
         }
       }
     }

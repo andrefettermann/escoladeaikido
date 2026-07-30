@@ -1,13 +1,41 @@
 import * as DojosRepository from "../dojos/dojos.repository";
+import * as GraduacoesRepository from "../graduacoes/graduacoes.repository"
+import * as PessoasRepository from "../pessoas/pessoas.repository"
 
+/*
 interface Resposta {
   sucesso: boolean;
-  docs?: any[];
-  doc?: any;
+  docs?: Dojo[];
+  doc?: Dojo;
   mensagem?: string;
   erro?: string;
 }
 
+interface Dojo {
+  id: number;
+  nome: string;
+  local: string;
+  endereco: string;
+  bairro: string;
+  cidade: string;
+  uf: string;
+  pais: string;
+  url: string;
+  email: string;
+  horarios: {
+    id: number;
+    id_professor: number;
+    nome_professor: string;
+    horario: string;
+  }[];
+  alunos: {
+    id: number;
+    nome: string;
+    id_gradauacao: number;
+  }[];
+  is_ativo: boolean;
+}
+*/
 function ordena(docs: any): any {
     docs.sort((a: { nome: string; }, b: { nome: string; }) => {
         var fa = a.nome.toLowerCase();
@@ -25,9 +53,8 @@ function ordena(docs: any): any {
     return docs;
 }
 
-export async function buscaPeloId(id: string): Promise<Resposta> {
+export async function buscaPeloId(id: string): Promise<Resposta<Dojo>> {
   try {
-
     const response = await DojosRepository.find(id)//.then(res => res.doc);
 
     if (!response || !response.sucesso) {
@@ -37,37 +64,64 @@ export async function buscaPeloId(id: string): Promise<Resposta> {
       };
     }
 
-    const dojo = {
-        id: response.doc._id,
-        nome: response.doc.nome,
-        endereco: response.doc.endereco,
-        bairro: response.doc.bairro,
-        cidade: response.doc.cidade,
-        uf: response.doc.uf,
-        pais: response.doc.pais,
-        local: response.doc.local,
-        url: response.doc.url,
-        email: response.doc.email,
-        id_professor: response.doc.id_professor,
-        horarios: response.doc.horarios,
-        is_ativo: response.doc.is_ativo,
-        professores: response.doc.professores,
-      };
+    if (Array.isArray(response.docs?.horarios)) {
+      for (const h of response.docs.horarios) {
+        if (h?.id_professor) {
+          try {
+            //a.nome = decripta(a.nome);
+
+            // O loop 'for...of' vai pausar aqui a cada iteração
+            const pessoa = await PessoasRepository.find(h.id_professor);
+            h.nome_professor = pessoa.docs?.nome ?? '';
+            h.nome_professor = decripta(h.nome_professor);
+          } catch (error) {
+            // Interrompe o loop e retorna o erro imediatamente
+            return {
+              sucesso: false,
+              mensagem: 'Erro descriptografar nome do aluno',
+            };
+          }
+        }
+      }
+    }
+
+    if (Array.isArray(response.docs?.alunos)) {
+      for (const a of response.docs.alunos) {
+        if (a?.nome) {
+          try {
+            a.nome = decripta(a.nome);
+
+            // O loop 'for...of' vai pausar aqui a cada iteração
+            const graduacao = await GraduacoesRepository.find(a.id_graduacao);
+            if (!a.graduacao) a.graduacao = {} as any;
+            a.graduacao.nome = graduacao.docs?.nome ?? '';
+          } catch (error) {
+            // Interrompe o loop e retorna o erro imediatamente
+            return {
+              sucesso: false,
+              mensagem: 'Erro descriptografar nome do aluno',
+            };
+          }
+        }
+      }
+    }
+
+    ordena(response.docs?.alunos);
 
     return {
       sucesso: true,
-      doc: dojo,
+      docs: response.docs,
     };
   } catch (error) {
     console.error("Ao buscar dojo pelo ID:", error);
     return {
       sucesso: false,
-      erro: (error as Error).message,
+      mensagem: (error as Error).message,
     };
   } 
 }
 
-export async function buscaTodos(): Promise<Resposta> {
+export async function buscaTodos(): Promise<Resposta<Dojo[]>> {
   try {
     const response = await DojosRepository.findAll();//.then(res => res.docs);
 
@@ -78,27 +132,13 @@ export async function buscaTodos(): Promise<Resposta> {
       };
     }
 
-    const dojos = response.docs?.map((d: any) => (
-      {
-        id: d._id,
-        nome: d.nome,
-        endereco: d.endereco,
-        bairro: d.bairro,
-        cidade: d.cidade,
-        uf: d.uf,
-        pais: d.pais,
-        local: d.local,
-        url: d.url,
-        email: d.email,
-        id_professor: d.id_professor,
-        horarios: d.horarios,
-        is_ativo: d.is_ativo,
-        professores: d.professores,
-    }));
-
+    response.docs?.map((d) => {
+      d.id = d._id;
+    })
+    
     return {
         sucesso: true,
-        docs: ordena(dojos),
+        docs: ordena(response.docs),
     };
   } catch (error) {
     console.error("Erro ao buscar todos os dojos:", error);
@@ -110,7 +150,7 @@ export async function buscaTodos(): Promise<Resposta> {
   }
 };
 
-export async function buscaSituacao(situacao: string): Promise<Resposta> {
+export async function buscaSituacao(situacao: string): Promise<Resposta<Dojo[]>> {
   try {
     const response = await DojosRepository.findBySituacao(situacao);
 
@@ -121,27 +161,13 @@ export async function buscaSituacao(situacao: string): Promise<Resposta> {
         };
     }
 
-    const dojos = response.docs?.map((d: any) => (
-    {
-      id: d._id,
-      nome: d.nome,
-      endereco: d.endereco,
-      bairro: d.bairro,
-      cidade: d.cidade,
-      uf: d.uf,
-      pais: d.pais,
-      local: d.local,
-      url: d.url,
-      email: d.email,
-      id_professor: d.id_professor,
-      horarios: d.horarios,
-      is_ativo: d.is_ativo,
-      professores: d.professores,
-    }));
+    response.docs?.map((d) => {
+      d.id = d._id;
+    })
 
     return {
         sucesso: true,
-        docs: ordena(dojos),
+        docs: ordena(response.docs),
     };
   } catch (error) {
     console.error("Erro ao buscar dojos por situação:", error);
@@ -212,13 +238,12 @@ export async function atualiza(event: any, id: string): Promise<Resposta> {
         return {
             'sucesso': false,
             'mensagem': "Erro ao atualizar os dados do dojo",
-            'erro': "Dojo não encontrado"
         }
     }
 
     return {
         sucesso: true,
-        doc: response.doc
+        docs: response.docs
     }
 
   } catch (error) {
@@ -241,13 +266,12 @@ export async function cria(event: any): Promise<Resposta> {
         return {
             'sucesso': false,
             'mensagem': "Erro ao criar o registro do dojo",
-            'erro': "Dojo não criado"
         }
     }
 
     return {
         sucesso: true,
-        doc: response.doc
+        docs: response.docs
     }
 
   } catch (error) {

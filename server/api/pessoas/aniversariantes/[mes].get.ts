@@ -1,12 +1,6 @@
 import * as PessoaService from "../pessoas.service";
 
-interface Resposta {
-    sucesso: boolean;
-    mensagem?: string;
-    dados?: any;
-}
-
-export default defineEventHandler(async (event): Promise<Resposta> => {
+export default defineEventHandler(async (event): Promise<Resposta<Pessoa[]>> => {
     const mes = getRouterParam(event, 'mes') ?? '';
 
     try {
@@ -20,7 +14,7 @@ export default defineEventHandler(async (event): Promise<Resposta> => {
 
         return {
             sucesso: true,
-            dados: dados.docs,
+            docs: dados.docs,
         };
     } catch (error) {
         return {

@@ -1,6 +1,7 @@
 import { GraduacaoSchema } from "../../models/Graduacao";
 import mongoose from 'mongoose';
 
+/*
 interface RespostaGraduacao {
   sucesso: boolean;
   doc?: IGraduacao;
@@ -22,7 +23,7 @@ interface IGraduacao {
   sequencia: number;
 };
 
-
+*/
 function ordena(docs: any): any {
     docs.sort((a: { nome: string; }, b: { nome: string; }) => {
         var fa = a.nome.toLowerCase();
@@ -40,7 +41,7 @@ function ordena(docs: any): any {
     return docs;
 }
 
-export async function buscaPeloId(id: string): Promise<RespostaGraduacao> {
+export async function buscaPeloId(id: string): Promise<Resposta<Graduacao>> {
   try {
     const pipeline = [
       { $match: { _id: new mongoose.Types.ObjectId(id) } },
@@ -62,23 +63,24 @@ export async function buscaPeloId(id: string): Promise<RespostaGraduacao> {
 
     return {
       sucesso: true,
-      doc: {
-        _id: resposta[0]._id,
-        nome: resposta[0].nome,
-        faixa: resposta[0].faixa,
-        sequencia: resposta[0].sequencia,
-      }
+      docs: resposta[0]
+//      {
+//        _id: resposta[0]._id,
+//        nome: resposta[0].nome,
+//        faixa: resposta[0].faixa,
+//        sequencia: resposta[0].sequencia,
+//      }
     }
   } catch (error) { 
     console.error("Erro ao buscar graduacao pelo ID:", error);
     return {
       sucesso: false,
-      erro: (error as Error).message,
+      mensagem: (error as Error).message,
     };
   } 
 }
 
-export async function buscaTodos(): Promise<RespostaGraduacoes> {
+export async function buscaTodos(): Promise<Resposta<Graduacao[]>> {
   const pipeline = [
       {
           $project: {
@@ -97,19 +99,19 @@ export async function buscaTodos(): Promise<RespostaGraduacoes> {
           .option({ maxTimeMS: 15000 })
           .exec();
 
-    const graduacoes = resposta.map((graduacao: any) => (
-      {
-        _id: graduacao._id,
-        nome: graduacao.nome,
-        faixa: graduacao.faixa,
-        sequencia: graduacao.sequencia,
-        categoria: graduacao.categoria,
-      }
-    ));
+//    const graduacoes = resposta.map((graduacao: any) => (
+//      {
+//        _id: graduacao._id,
+//        nome: graduacao.nome,
+//        faixa: graduacao.faixa,
+//        sequencia: graduacao.sequencia,
+//        categoria: graduacao.categoria,
+//      }
+//    ));
 
     return {
         sucesso: true,
-        docs: ordena(graduacoes),
+        docs: ordena(resposta),
     };
   } catch (error) {
     console.error("Erro ao buscar todas as pessoas:", error);

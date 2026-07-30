@@ -1,17 +1,11 @@
 import * as PessoaService from "../pessoas/pessoas.service";
 
-interface Resposta {
-    sucesso: boolean;
-    mensagem?: string;
-    dados?: any;
-}
-
-export default defineEventHandler(async (event): Promise<Resposta> => {
+export default defineEventHandler(async (event): Promise<Resposta<Pessoa[]>> => {
 
     try {
-        const pessoas = await PessoaService.buscaTodos();
+        const resposta = await PessoaService.buscaTodos();
 
-        if (!pessoas || !pessoas.docs || pessoas.docs.length === 0) {
+        if (!resposta || !resposta.docs || resposta.docs.length === 0) {
             return {
                 sucesso: false,
                 mensagem: 'Nenhuma pessoa cadastrada.',
@@ -20,7 +14,7 @@ export default defineEventHandler(async (event): Promise<Resposta> => {
 
         return {
             sucesso: true,
-            dados: pessoas.docs,
+            docs: resposta.docs,
         };
     } catch (error) {
         return {

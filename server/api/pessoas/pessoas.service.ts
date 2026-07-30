@@ -3,14 +3,6 @@ import { converteData, formataData } from "~~/server/utils/datas";
 import * as GraduacaoService from "~~/server/api/graduacoes/graduacoes.service";
 import * as PessoasRepository from "~~/server/api/pessoas/pessoas.repository";
 
-interface Resposta {
-  sucesso: boolean;
-  docs?: any[];
-  doc?: any;
-  mensagem?: string;
-  erro?: string;
-}
-
 function ordena(docs: any): any {
     docs.sort((a: { nome: string; }, b: { nome: string; }) => {
         var fa = a.nome.toLowerCase();
@@ -28,7 +20,14 @@ function ordena(docs: any): any {
     return docs;
 }
 
-export async function buscaPeloId(id: string): Promise<Resposta> {
+export async function buscaPeloId(id: string): Promise<Resposta<Pessoa>> {
+  if (!id) {
+    return {
+        sucesso: false,
+        mensagem: 'O id é obrigatório.'
+    };
+  }
+
   try {
 
     const response = await PessoasRepository.find(id)//.then(res => res.doc);
@@ -40,126 +39,96 @@ export async function buscaPeloId(id: string): Promise<Resposta> {
       };
     }
 
-    if (response.doc.promocoes || response.doc.promocoes.length > 0) {
-      const promocoesComNomes = await Promise.all(response.doc.promocoes.map(
+    if (response.docs && !Array.isArray(response.docs)) {
+      //response.docs.id = response.docs._id;
+      response.docs.nome = decripta(response.docs.nome);
+      response.docs.cpf = response.docs.cpf?decripta(response.docs.cpf):'';
+      response.docs.dojo = response.docs.dojo[0];
+      response.docs.graduacao = response.docs.graduacao[0];
+    }
+
+    if (response.docs?.promocoes) {
+      const promocoesComNomes = await Promise.all(response.docs.promocoes.map(
         async (promocao: { id_graduacao: any; data: string | number | Date; }) => {
           const graduacaoResponse = await GraduacaoService.buscaPeloId(promocao.id_graduacao);
           return {
             ...promocao,
             data: formataData(new Date(promocao.data)),
-            nome_graduacao: graduacaoResponse.doc ? graduacaoResponse.doc.nome : 'Desconhecido',
+            nome_graduacao: graduacaoResponse.docs ? graduacaoResponse.docs.nome : 'Desconhecido',
           };
         }));
-      response.doc.promocoes = promocoesComNomes;
-    }
-
-    const pessoa = {
-        id: response.doc._id,
-        aniversario: response.doc.aniversario,
-        cpf: response.doc.cpf?decripta(response.doc.cpf):'',
-        matricula: response.doc.matricula,
-        nome: decripta(response.doc.nome) ,
-        is_ativo: response.doc.is_ativo,
-        dojo: response.doc.dojo[0],
-        graduacao: response.doc.graduacao[0],
-        data_inicio_aikido: response.doc.data_inicio_aikido,
-        data_matricula: response.doc.data_matricula,
-        promocoes: response.doc.promocoes?.map((promocao: 
-          { data: string; id_graduacao: string, nome_graduacao: string }) => ({
-            data: promocao.data.toString(),
-            id_graduacao: promocao.id_graduacao,
-            nome_graduacao: promocao.nome_graduacao
-          }))
-        ,
-        tipo: response.doc.tipo,
-        cobrancas: response.doc.cobrancas?.map((cobranca: 
-          { _id: any; valor: any; data_vencimento: any; situacao: any; }) => ({
-          id: cobranca._id,
-          valor_devido: cobranca.valor,
-          data_vencimento: formataData(new Date(cobranca.data_vencimento)),
-          situacao: cobranca.situacao
-        }))
+      response.docs.promocoes = promocoesComNomes;
     }
 
     return {
       sucesso: true,
-      doc: pessoa,
+      docs: response.docs,
     };
   } catch (error) {
     console.error("Ao buscar pessoa pelo ID:", error);
     return {
       sucesso: false,
-      erro: (error as Error).message,
+      mensagem: (error as Error).message,
     };
   } 
 }
 
-export async function buscaTodos(): Promise<Resposta> {
+export async function buscaTodos(): Promise<Resposta<Pessoa[]>> {
   try {
     const response = await PessoasRepository.findAll();//.then(res => res.docs);
 
     if (!response || !response.sucesso) {
       return {
         sucesso: false,
-        mensagem: 'Nenhuma pessoa encontrada.',
+        mensagem: response.mensagem,
       };
     }
 
-    const pessoas = response.docs?.map((pessoa) => (
-      {
-        id: pessoa._id,
-        aniversario: pessoa.aniversario,
-        matricula: pessoa.matricula,
-        nome: decripta(pessoa.nome),
-        cpf: pessoa.cpf? decripta(pessoa.cpf):'',
-        is_ativo: pessoa.is_ativo,
-        dojo: pessoa.dojo?.[0],
-        graduacao: pessoa.graduacao?.[0],
-        tipo: pessoa.tipo,
-    }));
+    response.docs?.map((p) => {
+      p.id = p._id;
+      p.nome = decripta(p.nome);
+      p.cpf = p.cpf?decripta(p.cpf):'';
+      p.graduacao = p.graduacao[0];
+      p.dojo = p.dojo[0];
+    })
 
     return {
         sucesso: true,
-        docs: ordena(pessoas),
+        docs: ordena(response.docs),
     };
-  } catch (error) {
+  } catch (error: any) {
     console.error("Erro ao buscar todas as pessoas:", error);
     return {
         sucesso: false,
-        docs: [],
-        mensagem: 'Erro ao buscar as pessoas.',
+        //docs: [],
+        mensagem: error.mensagem,
     };
   }
 };
 
-export async function buscaSituacao(situacao: string): Promise<Resposta> {
+export async function buscaSituacao(situacao: string): Promise<Resposta<Pessoa[]>> {
   try {
-      const response = await PessoasRepository.findBySituacao(situacao);
+    const response = await PessoasRepository.findBySituacao(situacao);
 
-      if (!response || !response.sucesso) {
-          return {
-              sucesso: false,
-              mensagem: 'Nenhuma pessoa encontrada!',
-          };
-      }
+    if (!response || !response.sucesso) {
+        return {
+            sucesso: false,
+            mensagem: 'Nenhuma pessoa encontrada!',
+        };
+    }
 
-      const pessoas = response.docs?.map((pessoa) => (
-      {
-        id: pessoa._id,
-        aniversario: pessoa.aniversario,
-        matricula: pessoa.matricula,
-        nome: decripta(pessoa.nome),
-        cpf: pessoa.cpf? decripta(pessoa.cpf):'',
-        is_ativo: pessoa.is_ativo,
-        dojo: pessoa.dojo?.[0],
-        graduacao: pessoa.graduacao?.[0],
-        tipo: pessoa.tipo,
-      }));
+    response.docs?.map((p) => {
+      p.id = p._id;
+      p.nome = decripta(p.nome);
+      p.cpf = p.cpf?decripta(p.cpf):'';
+      p.graduacao = p.graduacao[0];
+      p.dojo = p.dojo[0];
+    })
 
-      return {
-          sucesso: true,
-          docs: ordena(pessoas),
-      };
+    return {
+        sucesso: true,
+        docs: ordena(response.docs),
+    };
   } catch (error) {
       console.error("Erro ao buscar pessoas por situação:", error);
       return {
@@ -170,7 +139,7 @@ export async function buscaSituacao(situacao: string): Promise<Resposta> {
   } 
 }
 
-export async function buscaAniversariantes(mes: string): Promise<Resposta> {
+export async function buscaAniversariantes(mes: string): Promise<Resposta<Pessoa[]>> {
   try {
       const response = await PessoasRepository.findByMesAniversario(mes);
 
@@ -181,23 +150,18 @@ export async function buscaAniversariantes(mes: string): Promise<Resposta> {
           };
       }
 
-      const pessoas = response.docs?.map((pessoa) => (
-      {
-        id: pessoa._id,
-        aniversario: pessoa.aniversario,
-        matricula: pessoa.matricula,
-        nome: decripta(pessoa.nome),
-        cpf: pessoa.cpf? decripta(pessoa.cpf):'',
-        is_ativo: pessoa.is_ativo,
-        dojo: pessoa.dojo?.[0],
-        graduacao: pessoa.graduacao?.[0],
-        tipo: pessoa.tipo,
-      }));
+    response.docs?.map((p) => {
+      p.id = p._id;
+      p.nome = decripta(p.nome);
+      p.cpf = p.cpf?decripta(p.cpf):'';
+      p.graduacao = p.graduacao[0];
+      p.dojo = p.dojo[0];
+    })
 
-      return {
-          sucesso: true,
-          docs: ordena(pessoas),
-      };
+    return {
+        sucesso: true,
+        docs: ordena(response.docs),
+    };
   } catch (error) {
       console.error("Erro ao buscar pessoas por mês de aniversário:", error);
       return {
@@ -208,7 +172,7 @@ export async function buscaAniversariantes(mes: string): Promise<Resposta> {
   } 
 }
 
-export async function buscaTipo(tipo: string): Promise<Resposta> {
+export async function buscaTipo(tipo: string): Promise<Resposta<Pessoa[]>> {
   try {
       const response = await PessoasRepository.findByTipo(tipo);
 
@@ -219,22 +183,17 @@ export async function buscaTipo(tipo: string): Promise<Resposta> {
           };
       }
 
-      const pessoas = response.docs?.map((pessoa) => (
-      {
-        id: pessoa._id,
-        aniversario: pessoa.aniversario,
-        matricula: pessoa.matricula,
-        nome: decripta(pessoa.nome),
-        cpf: pessoa.cpf? decripta(pessoa.cpf):'',
-        is_ativo: pessoa.is_ativo,
-        dojo: pessoa.dojo?.[0],
-        graduacao: pessoa.graduacao?.[0],
-        tipo: pessoa.tipo,
-      }));
+    response.docs?.map((p) => {
+      p.id = p._id;
+      p.nome = decripta(p.nome);
+      p.cpf = p.cpf?decripta(p.cpf):'';
+      p.graduacao = p.graduacao[0];
+      p.dojo = p.dojo[0];
+    })
 
       return {
           sucesso: true,
-          docs: ordena(pessoas),
+          docs: ordena(response.docs),
       };
   } catch (error) {
       console.error("Erro ao buscar pessoas por tipo:", error);
@@ -303,13 +262,12 @@ export async function atualiza(event: any, id: string): Promise<Resposta> {
         return {
             'sucesso': false,
             'mensagem': "Erro ao atualizar os dados",
-            'erro': "Registro não encontrado"
         }
     }
 
     return {
         sucesso: true,
-        doc: response.doc
+        docs: response.docs
     }
 
   } catch (error) {
@@ -332,13 +290,12 @@ export async function cria(event: any): Promise<Resposta> {
         return {
             'sucesso': false,
             'mensagem': "Erro ao criar o registro",
-            'erro': "Registro não criado"
         }
     }
 
     return {
         sucesso: true,
-        doc: response.doc
+        docs: response.docs
     }
 
   } catch (error) {

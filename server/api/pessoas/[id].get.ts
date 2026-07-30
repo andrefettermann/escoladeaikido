@@ -1,12 +1,6 @@
 import { buscaPeloId } from './pessoas.service';
 
-interface Resposta {
-    sucesso: boolean;
-    mensagem?: string;
-    dados?: any;
-}
-
-export default defineEventHandler(async (event): Promise<Resposta> => {
+export default defineEventHandler(async (event): Promise<Resposta<Pessoa>> => {
     const id = getRouterParam(event, 'id') ?? '';
 
     try {
@@ -15,13 +9,13 @@ export default defineEventHandler(async (event): Promise<Resposta> => {
         if (response.sucesso === false) {
             return {
                 sucesso: false,
-                mensagem: response.erro,
+                mensagem: response.mensagem,
             };
         }
 
         return {
             sucesso: true,
-            dados: response.doc,
+            docs: response.docs,
         };
     } catch (error: any) {
         return {

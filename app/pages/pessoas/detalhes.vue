@@ -142,45 +142,6 @@ function showMessage(text: string, type: 'success' | 'error' | 'info' = 'info') 
   setMensagem(text, type === 'error' ? 'error' : 'success');
 }
 
-// Computed para determinar qual endpoint usar baseado nos query params
-//const endpoint = computed(() => {
-//    return `/api/pessoas/${id}`;
-//});
-
-// Busca os dados através da API route do servidor
-// O watch: ['endpoint'] faz o refetch automático quando a rota mudar
-/*
-interface resposta { 
-  sucesso: boolean,
-  dados?: any,
-  mensagem?: string
-}
-const { data, pending, error, refresh} = await useFetch<resposta>(endpoint, 
-  { 
-    watch: [endpoint] 
-  });
-
-  console.log('Data fetched:', data.value?.sucesso);
-
-if (!data.value?.sucesso) {
-  showMessage(`${data.value?.mensagem || 'Erro desconhecido.'}`, 'error');
-}
-
-const pessoa =  {
-    nome: data.value?.dados?.nome || 'N/A',
-    matricula: data.value?.dados?.matricula || 'N/A',
-    aniversario: data.value?.dados?.aniversario || 'N/A',
-    data_inicio_aikido: data.value?.dados?.data_inicio_aikido || 'N/A',
-    data_matricula: data.value?.dados?.data_matricula || 'N/A',
-    is_ativo: data.value?.dados?.is_ativo,
-    cpf: data.value?.dados?.cpf || 'N/A',
-    tipo: data.value?.dados?.tipo?.charAt(0).toUpperCase() 
-                                + data.value?.dados?.tipo?.slice(1),
-    dojo: data.value?.dados?.dojo?.nome || 'N/A',
-    graduacao: data.value?.dados?.graduacao?.nome || 'N/A',
-    promocoes: data.value?.dados?.promocoes || []
-};
-*/
 // Busca a pessoa se id for fornecido
 const { pessoa, loading, error, refresh } = await usePessoa(id);
 if (error.value) {

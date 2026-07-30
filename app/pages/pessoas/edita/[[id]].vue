@@ -4,19 +4,6 @@
       <div class="card-header fw-bold">{{ title }}</div>
       <div class="card-body">
 
-        <div v-if="loading" class="text-center">
-          <p class="mb-4">Carregando dados...</p>
-          <div class="w-full bg-gray-200 rounded-full h-6 overflow-hidden" 
-          role="progressbar" aria-label="Animated striped example" aria-valuenow="75" 
-          aria-valuemin="0" aria-valuemax="100">
-            <div class="h-full bg-blue-600 animate-pulse" style="width: 75%"></div>
-          </div>
-        </div>
-      
-        <div v-else-if="error" class="error">
-          Erro ao carregar dados: {{ error.message }}
-        </div>
-
         <form id="formulario" @submit.prevent="grava">
 
           <!-- Info Alert -->
@@ -26,7 +13,8 @@
           </div>
 
           <!-- Mensagens -->
-          <div v-if="localMessage" :class="['alert', localMessageType === 'error' ? 'alert-danger' : localMessageType === 'success' ? 'alert-success' : 'alert-info', 'alert-dismissible']">
+          <div v-if="localMessage" 
+          :class="['alert', localMessageType === 'error' ? 'alert-danger' : localMessageType === 'success' ? 'alert-success' : 'alert-info', 'alert-dismissible']">
             <strong v-if="localMessageType === 'error'">Erro:</strong>
             <strong v-else-if="localMessageType === 'success'">Ok:</strong>
             <strong v-else>Info:</strong>
@@ -89,7 +77,7 @@
             </div>
           </div>
 
-          <!--Em atividade-->
+          <!--Em atividade -->
           <div class="form-group row mb-3">
             <div class="col-2">
               <label for="is_ativo" class="form-label">Em atividade?</label>
@@ -99,6 +87,7 @@
               name="is_ativo" v-model="pessoa.is_ativo" >
             </div>
           </div>
+        
 
           <!-- Aniversario -->
           <div class="form-group row mb-3">
@@ -111,20 +100,22 @@
               title="A data de aniversário(dd/mm)">
             </div>
           </div>
-
+        
           <!-- Data inicio -->
           <div class="form-group row mb-3">
             <div class="col-2">
               <label for="data_inicio" class="col-form-label">Data de início</label>
             </div>
             <div class="col-2">
-              <input type="text" class="form-control" id="data_inicio" name="data_inicio" v-model="pessoa.data_inicio_aikido"
-              placeholder="A data de início no aikidô" size="10" data-toggle="tooltip" data-placement="top" 
+              <input type="text" class="form-control" id="data_inicio" 
+              name="data_inicio" v-model="pessoa.data_inicio_aikido"
+              placeholder="A data de início no aikidô" size="10" 
+              data-toggle="tooltip" data-placement="top" 
               title="A data de início no aikidô">
             </div>
           </div>
-
-          <!--Data de matricula-->
+        
+          <!--Data de matricula -->
           <div class="form-group row mb-3">
             <div class="col-2">
               <label for="data_inicio" class="col-form-label">Data de matrícula</label>
@@ -136,8 +127,8 @@
               title="A data de início no aikidô">
             </div>
           </div>
-
-          <!--Tipo-->
+        
+          <!--Tipo -->
           <div class="form-group row mb-3">
             <div class="col-2">
               <label for="tipo" class="form-label">*Tipo</label>
@@ -154,17 +145,15 @@
             </div>
           </div>
 
-          <!--Dojo-->
+          <!-- Dojo -->
           <div class="form-group row mb-3">
             <div class="col-2">
               <label for="dojo" class="col-form-label">Dojo</label>
             </div>
             <div class="col-4">
                   <div v-if="carregandoDojos">Carregando...</div>
-                  <select
-                    v-else
-                    id="id_dojo" name="id_dojo" v-model="pessoa.dojo._id"
-                    class="form-select">
+                  <select v-else id="id_dojo" name="id_dojo" 
+                  v-model="pessoa.dojoId" class="form-select">
                     <option value="">Selecione...</option>
                     <option v-for="item in itemsDojos" :key="item.value" 
                     :value="item.value">
@@ -174,6 +163,7 @@
             </div>
           </div>
 
+        <!-- Promocoes -->
           <div class="card w-75 mx-auto mb-5">
             <div class="card-header fw-bold">Promoções</div>
             <div class="card-body" id="promocoes">
@@ -182,7 +172,7 @@
               type="button" 
               class="btn btn-primary mb-3" 
               @click="adicionarPromocao">
-              <i class="bi bi-plus-circle"> Adiciona Promoção</i>
+              <i class="bi bi-plus-circle"> Adiciona promoção</i>
             </button>
 
               <div v-if="pessoa.promocoes && pessoa.promocoes.length > 0">
@@ -228,7 +218,7 @@
                       class="btn btn-danger btn-sm" 
                       @click="removerPromocao(index)"
                       title="Remover">
-                      <i class="bi bi-trash">Exlui</i>
+                      <i class="bi bi-trash">Exclui</i>
                     </button>
                   </div>
 
@@ -251,58 +241,121 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
-
 definePageMeta({
   middleware: ['authenticated']
 })
 
-// Mensagem composable
-const { setMensagem } = useMensagem();
+const route = useRoute();
+const query = route.query;
+const id = route.params.id as string;
 
-// Local reactive alert state (replaces manual DOM toggling)
+const { setMensagem } = useMensagem();
 const localMessage = ref('');
 const localMessageType = ref<'success' | 'error' | 'info'>('info');
 
-function showMessage(text: string, type: 'success' | 'error' | 'info' = 'info') {
-  localMessage.value = text;
-  localMessageType.value = type;
-  // keep existing global composable for consistency
-  setMensagem(text, type === 'error' ? 'error' : 'success');
+const title = id ? 'Edita Pessoa' : 'Nova Pessoa';
+const isSaving = ref(false);
+
+const dojoId = computed({
+  get: () => pessoa.dojo?._id || '',
+  set: (value: string) => {
+    if (!pessoa.dojo) {
+      pessoa.dojo = { _id: '', nome: '' };
+    }
+    pessoa.dojo._id = value;
+  }
+});
+
+// Reactive pessoa object
+const pessoa = reactive<Pessoa & { dojoId?: string }>({
+  _id: '',
+  nome: '',
+  matricula: '',
+  aniversario: '',
+  is_ativo: false,
+  cpf: '',
+  tipo: '',
+  dojo: {
+    _id: '',
+    nome: ''
+  },
+  dojoId: '',
+  data_inicio_aikido: '',
+  data_matricula: '',
+  graduacao: {
+    _id: '',
+    nome: '',
+    faixa: '',
+    sequencia: 0
+  },
+  promocoes: []
+});
+
+// Busca os dados da pessoa na alteracao
+if (id) {
+  const pessoaEndpoint = computed(() => `/api/pessoas/${id}`);
+  const { data, error } = await useFetch<Resposta<Pessoa>>(pessoaEndpoint, 
+    { 
+      watch: [pessoaEndpoint] 
+    });
+
+  if (error.value) {
+    console.error('Erro ao buscar pessoa:', error.value);
+    const mensagem = error.value.data?.message 
+      || error.value.message 
+      || 'Erro ao buscar pessoa.';
+    showMessage(mensagem, 'error');
+  } else if (data.value) {
+    Object.assign(pessoa, data.value.docs);
+    // Sincroniza o ID auxiliar
+    pessoa.dojoId = data.value.docs?.dojo?._id || '';
+  }
 }
 
-const route = useRoute();
-const query = route.query;
-const id = (query.id as string) || '';
+// Inicializa as graduacoes
+const graduacoesEndpoint = '/api/graduacoes';
+const carregandoGraduacoes = ref(false);
+const dadosGraduacoes = ref<{ docs: any } | null>(null);
+fetchGraduacoes();
 
-const title = id ? 'Edita Pessoa' : 'Nova Pessoa';
+const items = computed(() => {
+  const docs = dadosGraduacoes.value?.docs || [];
+  return docs.map((grad: any) => 
+    ({ label: `${grad.nome} (${grad.categoria})`, value: grad._id }));
+});
+
+// Inicializa o tipo e a situacao
+const itemsTipo = computed(() => [
+  { label: 'Aluno', value: 'aluno' },
+  { label: 'Professor', value: 'professor' }
+]);
+
+// Inicializa os dojos
+//
+// Busca os dojos para popular o select
+//
+const dojosEndpoint = '/api/dojos';
+const carregandoDojos = ref(false);
+const dadosDojos = ref<{ docs: any } | null>(null);
+
+fetchDojos();
+
+const itemsDojos = computed(() => {
+  const docs = dadosDojos.value?.docs || [];
+  return docs.map((dojo: any) => ({ label: `${dojo.nome}`, value: dojo.id }));
+});
 
 //
-// Busca a pessoa se id for fornecido
+// ----------- Functions
 //
-const { pessoa, loading, error } = await usePessoa(id);
-
-if (error.value) {
-  const mensagem = error.value.data?.message 
-    || error.value.message 
-    || 'Erro ao buscar pessoa.';
-  showMessage(mensagem, 'error');
-} 
-//else {
-//  const mensagem = 'Pessoa carregada com sucesso.';
-//  showMessage(mensagem, 'info');
-//} 
 
 //
 // Busca as graduações para popular o select
 //
-const graduacoesEndpoint = '/api/graduacoes';
-const carregandoGraduacoes = ref(false);
-const dadosGraduacoes = ref<{ dados: any } | null>(null);
 async function fetchGraduacoes() {
   carregandoGraduacoes.value = true;
   
-  const { data, error } = await useFetch<{ dados: any }>(graduacoesEndpoint);
+  const { data, error } = await useFetch<{ docs: any }>(graduacoesEndpoint);
   
   if (error.value) {
     console.error('Erro ao buscar graduações:', error.value);
@@ -320,28 +373,13 @@ async function fetchGraduacoes() {
   carregandoGraduacoes.value = false;
 }
 
-await fetchGraduacoes();
-
-const items = computed(() => {
-  const docs = dadosGraduacoes.value?.dados || [];
-  return docs.map((grad: any) => ({ label: `${grad.nome} (${grad.categoria})`, value: grad._id }));
-});
-
-const itemsTipo = computed(() => [
-  { label: 'Aluno', value: 'aluno' },
-  { label: 'Professor', value: 'professor' }
-]);
-
 //
 // Busca os dojos para popular o select
 //
-const dojosEndpoint = '/api/dojos';
-const carregandoDojos = ref(false);
-const dadosDojos = ref<{ dados: any } | null>(null);
 async function fetchDojos() {
   carregandoDojos.value = true;
   
-  const { data, error } = await useFetch<{ dados: any }>(dojosEndpoint);
+  const { data, error } = await useFetch<{ docs: any }>(dojosEndpoint);
   
   if (error.value) {
     console.error('Erro ao buscar graduações:', error.value);
@@ -358,13 +396,6 @@ async function fetchDojos() {
   
   carregandoDojos.value = false;
 }
-
-fetchDojos();
-
-const itemsDojos = computed(() => {
-  const docs = dadosDojos.value?.dados || [];
-  return docs.map((dojo: any) => ({ label: `${dojo.nome}`, value: dojo.id }));
-});
 
 
 //
@@ -383,24 +414,22 @@ function isValidDateDDMM(s = '') {
   return re.test(s);
 }
 
-const isSaving = ref(false);
-
 //
 // Função para gravar a pessoa
 //
 async function grava() {
   if (!pessoa.nome || pessoa.nome.trimStart() === '') {
-    showMessage('Preencha o nome.', 'error');
+    showMessage('Preencha o campo obrigatório: nome.', 'error');
     return;
   }
 
   if (!pessoa.graduacao._id || pessoa.graduacao._id === '') {
-    showMessage('Preencha a graduação.', 'error');
+    showMessage('Preencha o campo obrigatório: graduação.', 'error');
     return;
   }
 
   if (!pessoa.tipo || pessoa.tipo === '') {
-    showMessage('Preencha o tipo.', 'error');
+    showMessage('Preencha o campo obrigatório: tipo.', 'error');
     return;
   }
 
@@ -409,15 +438,23 @@ async function grava() {
     return;
   }
 
-  if (!isValidDateDDMM(pessoa.aniversario || ''))  {
-    showMessage('A data de aniversário deve estar no formato dd/mm.', 'error');
+  if (!isValidDateDDMM(pessoa.aniversario || '') 
+    || !isValidDateDDMM(pessoa.data_inicio_aikido || '') 
+    || !isValidDateDDMM(pessoa.data_matricula || '')) {
+    showMessage('Datas devem estar no formato dd/mm ou ficar em branco.', 'error');
     return;
   }
 
-  // dojoId is already synced in pessoa object
+  // Sincroniza dojoId com dojo._id
+  if (pessoa.dojoId) {
+    if (!pessoa.dojo) pessoa.dojo = { _id: '', nome: '' };
+    pessoa.dojo._id = pessoa.dojoId;
+  } else {
+    pessoa.dojo = { _id: '', nome: '' };
+  }
 
-  const endpoint = pessoa.id ? `/api/pessoas/${pessoa.id}` : '/api/pessoas';
-  const method = pessoa.id ? 'PATCH' : 'POST';
+  const endpoint = pessoa._id ? `/api/pessoas/${pessoa._id}` : '/api/pessoas';
+  const method = pessoa._id ? 'PATCH' : 'POST';
 
   try {
     isSaving.value = true;
@@ -425,14 +462,21 @@ async function grava() {
       method,
       body: pessoa
     });
-    
+
     showMessage('Pessoa gravada com sucesso!', 'success');
-//    await navigateTo('/pessoas') //, { replace: true });
+    await navigateTo('/pessoas', { replace: true });
   } catch (err: any) {
     console.error(err);
     showMessage(err?.data?.message || 'Erro ao gravar pessoa', 'error');
     isSaving.value = false;
   }
+}
+
+function showMessage(text: string, type: 'success' | 'error' | 'info' = 'info') {
+  localMessage.value = text;
+  localMessageType.value = type;
+  // keep existing global composable for consistency
+  setMensagem(text, type === 'error' ? 'error' : 'success');
 }
 
 //
@@ -441,21 +485,21 @@ async function grava() {
 const adicionarPromocao = () => {
   // Inicializa o array se não existir
   if (!pessoa.promocoes) {
-    pessoa.promocoes = [];
+    pessoa.promocoes = []
   }
   
-  if (pessoa.promocoes) {
-    pessoa.promocoes.push({
-      data: '',
-      id_graduacao: '',
-      nome_graduacao: ''
-    });
-  }
+  pessoa.promocoes.push({
+    data: '',
+    id_graduacao: '',
+    nome_graduacao: ''
+  })
 }
 
+//
 // Função para remover promoção
 //
 const removerPromocao = (index: number) => {
   pessoa?.promocoes?.splice(index, 1)
 }
+
 </script>

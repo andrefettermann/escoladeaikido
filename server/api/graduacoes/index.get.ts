@@ -1,12 +1,6 @@
 import * as GraduacaoService from "../graduacoes/graduacoes.service";
 
-interface Resposta {
-    sucesso: boolean;
-    mensagem?: string;
-    dados?: any;
-}
-
-export default defineEventHandler(async (event): Promise<Resposta> => {
+export default defineEventHandler(async (event): Promise<Resposta<Graduacao[]>> => {
 
     try {
         const graduacoes = await GraduacaoService.buscaTodos();
@@ -20,7 +14,7 @@ export default defineEventHandler(async (event): Promise<Resposta> => {
 
         return {
             sucesso: true,
-            dados: graduacoes.docs,
+            docs: graduacoes.docs,
         };
     } catch (error) {
         return {

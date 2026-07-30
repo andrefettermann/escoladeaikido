@@ -1,6 +1,7 @@
 import { PessoaSchema } from "~~/server/models/Pessoa";
 import mongoose from 'mongoose';
 
+/*
 interface Resposta {
   sucesso: boolean;
   docs?: any[];
@@ -8,7 +9,7 @@ interface Resposta {
   mensagem?: string;
   erro?: string;
 }
-
+*/
 const lookupDojo = {
     $lookup: {
         from: 'dojos',
@@ -47,7 +48,7 @@ const lookupCobrancas = {
     }
 } 
 
-export async function find(id: string): Promise<Resposta> {
+export async function find(id: string): Promise<Resposta<any>> {
   try {
     const pipeline = [
       { $match: { _id: new mongoose.Types.ObjectId(id) } },
@@ -56,18 +57,18 @@ export async function find(id: string): Promise<Resposta> {
       lookupCobrancas,
       {
           $project: {
-              _id: 1,
-              nome: 1,
-              aniversario: 1,
-              matricula: 1,
-              is_ativo: 1,
-              cpf: 1,
-              tipo: 1,
-              data_inicio_aikido: 1, 
-              data_matricula: 1,
-              promocoes: 1,
-              dojo: 1,
-              graduacao: 1,
+            _id: 1,
+            nome: 1,
+            aniversario: 1,
+            matricula: 1,
+            is_ativo: 1,
+            cpf: 1,
+            tipo: 1,
+            data_inicio_aikido: 1, 
+            data_matricula: 1,
+            promocoes: 1,
+            dojo: 1,
+            graduacao: 1,
             cobrancas: 1
           } 
       },
@@ -89,18 +90,18 @@ export async function find(id: string): Promise<Resposta> {
 
     return {
       sucesso: true,
-      doc: response[0],
+      docs: response[0],
     };
   } catch (error) {
     console.error(`Repositorio - ao buscar pessoa pelo ID: ${error}`);
     return {
       sucesso: false,
-      erro: (error as Error).message,
+      mensagem: (error as Error).message,
     };
   } 
 }
 
-export async function findAll(): Promise<Resposta> {
+export async function findAll(): Promise<Resposta<any[]>> {
   const pipeline = [
       lookupDojo,
       lookupGraduacao,
@@ -138,13 +139,13 @@ export async function findAll(): Promise<Resposta> {
     console.error("Erro ao buscar todas as pessoas:", error);
     return {
         sucesso: false,
-        docs: [],
+        //docs: [],
         mensagem: 'Erro ao buscar as pessoas.',
     };
   }
 };
 
-export async function findBySituacao(situacao: string): Promise<Resposta> {
+export async function findBySituacao(situacao: string): Promise<Resposta<any[]>> {
   var isAtivo = false;
   if (situacao !== 'ativo' && situacao !== 'inativo') {
     return {
@@ -201,7 +202,7 @@ export async function findBySituacao(situacao: string): Promise<Resposta> {
   }
 }
 
-export async function findByMesAniversario(mes: string): Promise<Resposta> {
+export async function findByMesAniversario(mes: string): Promise<Resposta<any[]>> {
   const pipeline = [
 //      {
 //          $addFields: {
@@ -252,7 +253,7 @@ export async function findByMesAniversario(mes: string): Promise<Resposta> {
   }
 }
 
-export async function findByTipo(tipo: string): Promise<Resposta> {
+export async function findByTipo(tipo: string): Promise<Resposta<any[]>> {
   const pipeline = [
       { $match: { tipo: tipo } },
       lookupDojo,
@@ -283,7 +284,7 @@ export async function findByTipo(tipo: string): Promise<Resposta> {
               mensagem: 'Nenhuma pessoa encontrada para o tipo informado.',
           };
       }
-
+/*
       const pessoas = response.map((pessoa) => (
       {
         id: pessoa._id,
@@ -296,7 +297,7 @@ export async function findByTipo(tipo: string): Promise<Resposta> {
         graduacao: pessoa.graduacao?.[0],
         tipo: pessoa.tipo,
       }));
-
+*/
       return {
           sucesso: true,
           docs: response,
@@ -311,7 +312,7 @@ export async function findByTipo(tipo: string): Promise<Resposta> {
   }
 }
 
-export async function update(id: string, dados: any): Promise<Resposta> {
+export async function update(id: string, dados: any): Promise<Resposta<any>> {
   try {
     const response = await PessoaSchema.findByIdAndUpdate(
         {"_id": id},
@@ -326,13 +327,12 @@ export async function update(id: string, dados: any): Promise<Resposta> {
       return {
           'sucesso': false,
           'mensagem': "Erro ao atualizar os dados",
-          'erro': "Registro não encontrado"
       }
     }
     
     return {
         sucesso: true,
-        doc: response
+        docs: response
     }
 
   } catch (error) {
@@ -344,7 +344,7 @@ export async function update(id: string, dados: any): Promise<Resposta> {
 
 }
 
-export async function create(dados: any): Promise<Resposta> {
+export async function create(dados: any): Promise<Resposta<any>> {
   try {
     const pessoa = new PessoaSchema(dados);
     const response = await pessoa.save();
@@ -353,13 +353,12 @@ export async function create(dados: any): Promise<Resposta> {
       return {
           'sucesso': false,
           'mensagem': "Erro ao criar a pessoa",
-          'erro': "Registro não criado"
       }
     }
 
     return {
         sucesso: true,
-        doc: response
+        docs: response
     }
 
   } catch (error) {

@@ -12,7 +12,8 @@
 
     <div>
       <h1 class="fs-3 fw-bold">Pessoas cadastradas</h1>
-      <p class="fs-6 text-secondary">Gerencie as pessoas cadastradas na escola, incluindo alunos, professores e outros membros.</p>
+      <p class="fs-6 text-secondary">Gerencie as pessoas cadastradas na escola, 
+        incluindo alunos, professores e outros membros.</p>
     </div>
 
     <div>
@@ -41,7 +42,7 @@
     
       <div class="mb-2">
         <nuxt-link id="botao_nova_pessoa" name="botao_nova_pessoa" 
-            class="btn btn-success btn-sm m-1" href="/pessoas/edita_pessoa">
+            class="btn btn-success btn-sm m-1" href="/pessoas/edita">
               Incluir pessoa
         </nuxt-link>
 
@@ -93,7 +94,7 @@
                 Nenhuma pessoa encontrada
               </td>
             </tr>
-            <tr v-for="pessoa in pessoasFiltradas" :key="pessoa.id">
+            <tr v-for="pessoa in pessoasFiltradas" :key="pessoa._id">
               <th scope="row">
                 <span :class="{ 'text-decoration-line-through': !pessoa.is_ativo }" class="fs-6 fw-semibold">
                   {{ pessoa.nome }}
@@ -111,19 +112,18 @@
               <td>
                 <div v-if="(user as any)?.role != 'admin'" class="d-flex gap-2">
                   <nuxt-link
-                    :id="`detalhes_pessoa_${pessoa.id}`"
+                    :id="`detalhes_pessoa_${pessoa._id}`"
                     class="link-primary fw-semibold"
-                    :to="`/pessoas/detalhes_pessoa?id=${pessoa.id}`"
+                    :to="`/pessoas/detalhes?id=${pessoa._id}`"
                     :aria-label="`Ver detalhes de ${pessoa.nome}`"
                   >
                     Ver
                   </nuxt-link>
                   <nuxt-link
-                    :id="`edita_pessoa_${pessoa.id}`"
+                    :id="`edita_pessoa_${pessoa._id}`"
                     class="link-primary fw-semibold"
-                    :to="{ path: '/pessoas/edita_pessoa', query: { id: pessoa.id } }"
-                    :aria-label="`Editar dados de ${pessoa.nome}`"
-                  >
+                    :to="{ path: `/pessoas/edita/${pessoa._id}` }"
+                    :aria-label="`Editar dados de ${pessoa.nome}`">
                     Editar
                   </nuxt-link>
                 </div>
@@ -181,18 +181,12 @@ const endpoint = computed(() => {
 
 const localMessage = ref('');
 const localMessageType = ref<'success' | 'error' | 'info'>('info');
-function showMessage(text: string, type: 'success' | 'error' | 'info' = 'info') {
-  localMessage.value = text;
-  localMessageType.value = type;
-  // keep existing global composable for consistency
-  setMensagem(text, type === 'error' ? 'error' : 'success');
-}
 
 
 // Busca os dados através da API route do servidor
 // O watch: ['endpoint'] faz o refetch automático quando a rota mudar
 const { data, pending, error, refresh } = 
-  useFetch<{ sucesso: boolean; mensagem?: string; dados?: any[] }>(endpoint);
+  useFetch<{ sucesso: boolean; mensagem?: string; docs?: Pessoa[] }>(endpoint);
 
 if (error.value) {
   console.error('Erro ao buscar pessoas:', error.value);
@@ -222,16 +216,16 @@ const filtro = ref('');
 // Computed property que filtra as pessoas baseado no texto digitado
 const pessoasFiltradas = computed(() => {
   // Se não houver dados, retorna array vazio
-  if (!data.value?.dados) return [];
+  if (!data.value?.docs) return [];
   
   // Se o filtro estiver vazio, retorna todos os dados
-  if (!filtro.value) return data.value.dados;
+  if (!filtro.value) return data.value.docs;
   
   const valorFiltro = filtro.value.toLowerCase();
   
-  return data.value.dados.filter((pessoa: any) => {
+  return data.value.docs.filter((pessoa: any) => {
     const textoCompleto = [
-      pessoa.id,
+      pessoa._id,
       pessoa.nome,
       pessoa.matricula,
       pessoa.graduacao?.nome,
@@ -243,5 +237,12 @@ const pessoasFiltradas = computed(() => {
     return textoCompleto.includes(valorFiltro);
   });
 });
+
+function showMessage(text: string, type: 'success' | 'error' | 'info' = 'info') {
+  localMessage.value = text;
+  localMessageType.value = type;
+  // keep existing global composable for consistency
+  setMensagem(text, type === 'error' ? 'error' : 'success');
+}
 
 </script>
