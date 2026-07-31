@@ -229,10 +229,11 @@
 
           <div class="col-12">
             <button id="grava" name="grava" :disabled="isSaving" type="submit" 
-            class="btn btn-primary btn-sm mt-4 me-2">Gravar</button>
+            class="btn btn-primary btn-sm mt-4 me-2" title="Grava" 
+            aria-label="Grava">Gravar</button>
             <NuxtLink id="cancela" name="cancela" 
-            class="btn btn-secondary btn-sm mt-4" 
-            :to="'/pessoas'">Cancela</NuxtLink>
+            class="btn btn-warning btn-sm mt-4" aria-label="Cancela" 
+            title="Cancela" :to="'/pessoas'">Cancela</NuxtLink>
           </div>
         </form>
       </div>
@@ -313,9 +314,9 @@ if (id) {
 }
 
 // Inicializa as graduacoes
-const graduacoesEndpoint = '/api/graduacoes';
+const graduacoesEndpoint = computed(()=>'/api/graduacoes');
 const carregandoGraduacoes = ref(false);
-const dadosGraduacoes = ref<{ docs: any } | null>(null);
+const dadosGraduacoes = ref<Resposta<Graduacao[]> | null>(null);
 fetchGraduacoes();
 
 const items = computed(() => {
@@ -331,18 +332,15 @@ const itemsTipo = computed(() => [
 ]);
 
 // Inicializa os dojos
-//
-// Busca os dojos para popular o select
-//
 const dojosEndpoint = '/api/dojos';
 const carregandoDojos = ref(false);
-const dadosDojos = ref<{ docs: any } | null>(null);
+const dadosDojos = ref<Resposta<Dojo[]> | null>(null);
 
 fetchDojos();
 
 const itemsDojos = computed(() => {
   const docs = dadosDojos.value?.docs || [];
-  return docs.map((dojo: any) => ({ label: `${dojo.nome}`, value: dojo.id }));
+  return docs.map((dojo: any) => ({ label: `${dojo.nome}`, value: dojo._id }));
 });
 
 //
@@ -355,7 +353,12 @@ const itemsDojos = computed(() => {
 async function fetchGraduacoes() {
   carregandoGraduacoes.value = true;
   
-  const { data, error } = await useFetch<{ docs: any }>(graduacoesEndpoint);
+  const { data, error } = await useFetch<Resposta<Graduacao[]>>(
+    graduacoesEndpoint, 
+    { 
+      watch: [graduacoesEndpoint] 
+    }
+  );
   
   if (error.value) {
     console.error('Erro ao buscar graduações:', error.value);
@@ -379,7 +382,7 @@ async function fetchGraduacoes() {
 async function fetchDojos() {
   carregandoDojos.value = true;
   
-  const { data, error } = await useFetch<{ docs: any }>(dojosEndpoint);
+  const { data, error } = await useFetch<Resposta<Dojo[]>>(dojosEndpoint);
   
   if (error.value) {
     console.error('Erro ao buscar graduações:', error.value);
@@ -396,7 +399,6 @@ async function fetchDojos() {
   
   carregandoDojos.value = false;
 }
-
 
 //
 // Validacoes

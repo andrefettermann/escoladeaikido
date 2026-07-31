@@ -2,40 +2,6 @@ import * as DojosRepository from "../dojos/dojos.repository";
 import * as GraduacoesRepository from "../graduacoes/graduacoes.repository"
 import * as PessoasRepository from "../pessoas/pessoas.repository"
 
-/*
-interface Resposta {
-  sucesso: boolean;
-  docs?: Dojo[];
-  doc?: Dojo;
-  mensagem?: string;
-  erro?: string;
-}
-
-interface Dojo {
-  id: number;
-  nome: string;
-  local: string;
-  endereco: string;
-  bairro: string;
-  cidade: string;
-  uf: string;
-  pais: string;
-  url: string;
-  email: string;
-  horarios: {
-    id: number;
-    id_professor: number;
-    nome_professor: string;
-    horario: string;
-  }[];
-  alunos: {
-    id: number;
-    nome: string;
-    id_gradauacao: number;
-  }[];
-  is_ativo: boolean;
-}
-*/
 function ordena(docs: any): any {
     docs.sort((a: { nome: string; }, b: { nome: string; }) => {
         var fa = a.nome.toLowerCase();
@@ -132,9 +98,9 @@ export async function buscaTodos(): Promise<Resposta<Dojo[]>> {
       };
     }
 
-    response.docs?.map((d) => {
-      d.id = d._id;
-    })
+    //response.docs?.map((d) => {
+    //  d.id = d._id;
+    //})
     
     return {
         sucesso: true,
@@ -198,19 +164,20 @@ function trataException(exception: any): string {
   return mensagem;
 }
 
-function preparaDadosGravacao(osDados: any): any {
+function preparaDadosGravacao(osDados: Dojo): any {
 
-  const docsProfessores: any[] = [];
-  osDados.professores.forEach((p: any)=>{
-    docsProfessores.push({
-      'id_professor': p.id_professor
+  const horarios: any[] = [];
+  osDados.horarios?.forEach((h: any)=>{
+    horarios.push({
+      'id_professor': h.id_professor,
+      'horario': h.horario
     });
   })
   
 
   const doc = {
-    'id': osDados.id,
-    'nome': osDados.nom,
+    'id': osDados._id,
+    'nome': osDados.nome,
     'local': osDados.local,
     'endereco': osDados.endereco,
     'bairro': osDados.bairro,
@@ -219,18 +186,22 @@ function preparaDadosGravacao(osDados: any): any {
     'pais': osDados.pais,
     'url': osDados.url,
     'email': osDados.email,
-    'horarios': osDados.horarios,
+    'horarios': horarios,
     'is_ativo': osDados.is_ativo,
-    'professores': docsProfessores,
   }
 
+  
   return doc;
 }
 
-export async function atualiza(event: any, id: string): Promise<Resposta> {
+export async function atualiza(event: any, id: string): Promise<Resposta<Dojo>> {
   const body = await readBody(event);
   const dados = preparaDadosGravacao(body);
+  
+  const response = await DojosRepository.update(id, dados);
+  return response;
 
+  /*
   try {
     const response = await DojosRepository.update(id, dados);
 
@@ -252,33 +223,22 @@ export async function atualiza(event: any, id: string): Promise<Resposta> {
             mensagem: trataException(error)
         }
     }
-
+  */
 }
 
-export async function cria(event: any): Promise<Resposta> {
+export async function cria(event: any): Promise<Resposta<Dojo>> {
   const body = await readBody(event);
   const dados = preparaDadosGravacao(body);
 
-  try {
-    const response = await DojosRepository.create(dados);
+  const response = await DojosRepository.create(dados);
 
-    if (!response || !response.sucesso) {
-        return {
-            'sucesso': false,
-            'mensagem': "Erro ao criar o registro do dojo",
-        }
-    }
+  if (!response.sucesso) {
+    return response;
+  }
 
-    return {
-        sucesso: true,
-        docs: response.docs
-    }
-
-  } catch (error) {
-        return {
-            sucesso: false,
-            mensagem: trataException(error)
-        }
-    }
+  return {
+    sucesso: true,
+    docs: response.docs
+  }
 
 }

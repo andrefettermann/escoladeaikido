@@ -5,6 +5,14 @@
       <div class="card-body">
         <form id="formulario" @submit.prevent="grava">
 
+          <div class="col-12 mb-2">
+            <button :disabled="isSaving" type="submit" 
+            class="btn btn-primary btn-sm mt-4 me-2">Gravar</button>
+            <a id="botao_cancela" name="botao_cancela" 
+            class="btn btn-warning btn-sm mt-4" href="/dojos">Cancela</a>
+          </div>
+
+
           <!-- Info Alert -->
           <div class="alert alert-info alert-dismissible fade show">
             <strong>Info!</strong> O '*'' indica os campos obrigatórios.
@@ -201,13 +209,12 @@
                 </div> 
               </div>
             </div>
-            
-          
 
           <div class="col-12">
-            <button :disabled="isSaving" type="submit" class="btn btn-primary btn-sm mt-4 me-2">Gravar</button>
-            <a id="botao_cancela" name="botao_cancela" class="btn btn-secondary btn-sm mt-4" 
-            href="/dojos">Cancela</a>
+            <button :disabled="isSaving" type="submit" 
+            class="btn btn-primary btn-sm mt-4 me-2">Gravar</button>
+            <a id="botao_cancela" name="botao_cancela" 
+            class="btn btn-warning btn-sm mt-4" href="/dojos">Cancela</a>
           </div>
         </form>
       </div>

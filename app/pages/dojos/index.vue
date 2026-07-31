@@ -74,7 +74,7 @@
                 Nenhum dojo encontrado
               </td>
             </tr>
-            <tr v-for="dojo in dojosFiltrados" :key="dojo.id">
+            <tr v-for="dojo in dojosFiltrados" :key="dojo._id">
               <th scope="row">
                 <span :class="{ 'text-decoration-line-through': !dojo.is_ativo }" class="fs-6 fw-semibold">
                   {{ dojo.nome }}
@@ -92,14 +92,14 @@
               <td>
                 <div v-if="(user as any)?.role != 'admin'" class="d-flex gap-2">
                   <nuxt-link
-                    :id="`detalhes_dojo_${dojo.id}`"
-                    class="link-primary fw-semibold"
+                    :id="`detalhes_dojo_${dojo._id}`"
+                    class="btn btn-primary btn-sm m-1"
                     :to="{ path: '/dojos/detalhes', query: { id: dojo._id } }"
                     :aria-label="`Ver detalhes de ${dojo.nome}`">Ver</nuxt-link>
 
                   <nuxt-link
-                    :id="`edita_dojo_${dojo.id}`"
-                    class="link-primary fw-semibold"
+                    :id="`edita_dojo_${dojo._id}`"
+                    class="btn btn-primary btn-sm m-1"
                     :to="{ path: `/dojos/edita/${dojo._id}` }"
                     :aria-label="`Editar dados de ${dojo.nome}`">Editar</nuxt-link>
                 </div>
@@ -148,10 +148,11 @@ const endpoint = computed(() => {
 
 // Busca os dados através da API route do servidor
 // O watch: ['endpoint'] faz o refetch automático quando a rota mudar
-const { data, pending, error, refresh } = 
-  useFetch<{ sucesso: boolean; mensagem?: string; docs?: any[] }>(endpoint);
-
-  
+const { data, pending, error, refresh } = useFetch<Resposta<Dojo[]>>(endpoint,
+  { 
+    watch: [endpoint] 
+  }
+);
 
 // Computed para o título do filtro aplicado
 const tituloFiltro = computed(() => {

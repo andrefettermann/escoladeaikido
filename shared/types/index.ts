@@ -34,7 +34,7 @@ export interface Dojo {
 }
 
 export interface Graduacao {
-  id: string;
+  _id: string;
   nome: string;
   faixa: string;
   categoria: string;

@@ -1,4 +1,5 @@
 import { defineMongooseModel } from '#nuxt/mongoose'
+import { required } from 'zod/mini'
 
 export const DojoSchema = defineMongooseModel({
   name: 'dojos',
@@ -39,10 +40,10 @@ export const DojoSchema = defineMongooseModel({
         type: String,
         required: false
     },
-    id_professor: {
-        type: String,
-        required: false
-    },
+//    id_professor: {
+//        type: String,
+//        required: false
+//    },
 //    horarios: {
 //        type: String,
 //        required: false
@@ -51,8 +52,12 @@ export const DojoSchema = defineMongooseModel({
         type: Boolean,
         required: false
     },
-    professores: [{
+    horarios: [{
         id_professor: {
+            type: String,
+            required: false
+        },
+        horario: {
             type: String,
             required: false
         }

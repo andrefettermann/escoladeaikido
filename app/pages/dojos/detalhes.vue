@@ -3,15 +3,12 @@
     
     <div class="mb-2 d-flex gap-2 fw-semibold">
 
-        <nuxt-link id="edita" name="edita" class="link-primary" 
-          :to="`/dojos/edita?id=${id}`">
-          Edita
-        </nuxt-link>
+        <nuxt-link id="edita" name="edita" class="btn btn-primary btn-sm m-1"
+        :to="{ path: `/dojos/edita/${id}` }"
+        :aria-label="`Editar dados de ${dojo?.nome}`">Edita</nuxt-link>
 
-        <nuxt-link id="cancela" name="cancela" class="link-primary" 
-          :to="`/dojos`">
-          Cancela
-        </nuxt-link>
+        <nuxt-link id="cancela" name="cancela" 
+        class="btn btn-warning btn-sm m-1" :to="`/dojos`">Cancela</nuxt-link>
 
     </div>
 

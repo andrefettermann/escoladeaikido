@@ -185,8 +185,11 @@ const localMessageType = ref<'success' | 'error' | 'info'>('info');
 
 // Busca os dados através da API route do servidor
 // O watch: ['endpoint'] faz o refetch automático quando a rota mudar
-const { data, pending, error, refresh } = 
-  useFetch<{ sucesso: boolean; mensagem?: string; docs?: Pessoa[] }>(endpoint);
+const { data, pending, error, refresh } = useFetch<Resposta<Pessoa[]>>(endpoint,
+{ 
+    watch: [endpoint] 
+});
+
 
 if (error.value) {
   console.error('Erro ao buscar pessoas:', error.value);

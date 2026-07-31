@@ -2,12 +2,15 @@
   <div class="container pt-3 w-100">
     
     <div class="mb-2">
-        <nuxt-link id="edita" name="edita" class="btn btn-primary btn-sm m-1" 
-          :to="`/pessoas/edita_pessoa?id=${id}`">
-          Edita
+        <nuxt-link
+          :id="`edita_pessoa_${pessoa?.docs?._id}`"
+          class="btn btn-primary btn-sm m-1"
+          :to="{ path: `/pessoas/edita/${pessoa?.docs?._id}` }"
+          :aria-label="`Editar dados de ${pessoa?.docs?.nome}`">
+          Editar
         </nuxt-link>
 
-        <nuxt-link id="cancela" name="cancela" class="btn btn-primary btn-sm m-1" 
+        <nuxt-link id="cancela" name="cancela" class="btn btn-warning btn-sm m-1" 
           :to="`/pessoas`">
           Cancela
         </nuxt-link>
@@ -25,14 +28,13 @@
 
     <div class="card">
       <div class="card-header fw-bold">
-        <span>{{ pessoa.nome }} ({{ pessoa.graduacao.nome }})</span>
+        <span>{{ pessoa?.docs?.nome }} ({{ pessoa?.docs?.graduacao.nome }})</span>
       </div>
       <div class="card-body">
           <div class="row">
               <div class="col">
-
                 
-                <div v-if="loading" class="loading">
+                <div v-if="pending" class="loading">
                   Carregando dados...
                 </div>
 
@@ -41,63 +43,68 @@
                   <button @click="() => refresh()" class="btn">Tentar novamente</button>
                 </div>
 
-                <div v-else-if="pessoa" class="col">
+                <div v-else-if="pessoa?.docs" class="col">
                   <div class="row mb-2">
                     <div class="col">
-                      <strong>Matrícula:</strong> {{ pessoa.matricula }}
+                      <strong>Matrícula:</strong> 
+                      {{ pessoa?.docs?.matricula }}
                     </div>
                   </div>
                   <div class="row mb-2">
                     <div class="col">
-                      <strong>Aniversário:</strong> {{ pessoa.aniversario }}
+                      <strong>Aniversário:</strong> 
+                      {{ pessoa?.docs?.aniversario }}
                     </div>
                   </div>
                   <div class="row mb-2">
                     <div class="col">
-                      <strong>CPF:</strong> {{ pessoa.cpf }}
+                      <strong>CPF:</strong> {{ pessoa?.docs?.cpf }}
                     </div>
                   </div>
                   <div class="row mb-2">
                     <div class="col">
-                      <strong>Em atividade?</strong> {{ pessoa.is_ativo?'Sim':'Não' }}
+                      <strong>Em atividade?</strong> 
+                      {{ pessoa?.docs?.is_ativo?'Sim':'Não' }}
                     </div>
                   </div>
                   <div class="row mb-2">
                     <div class="col">
                       <strong>Data de Início no Aikido:</strong>
-                      {{ pessoa.data_inicio_aikido || 'N/A' }}
+                      {{ pessoa?.docs?.data_inicio_aikido || 'N/A' }}
                     </div>
                   </div>
                   <div class="row mb-2">
                     <div class="col">
                       <strong>Data de Matrícula:</strong>
-                      {{ pessoa.data_matricula || 'N/A' }}
+                      {{ pessoa?.docs?.data_matricula || 'N/A' }}
                     </div>
                   </div>
                   <div class="row mb-2">
                     <div class="col">
                       <strong>Tipo:</strong>
-                      {{ pessoa.tipo.charAt(0).toUpperCase() + pessoa.tipo.slice(1) }}
+                      {{ pessoa?.docs?.tipo?.charAt(0).toUpperCase() 
+                      + pessoa?.docs?.tipo?.slice(1) }}
                   </div>
                 </div>
                 <div class="row mb-2">
                   <div class="col">
                       <strong>Dojo:</strong>
-                      {{ pessoa.dojo.nome }}
+                      {{ pessoa?.docs?.dojo.nome }}
                   </div>
                 </div>
 
                 <div class="card mb-3 mt-4">
                   <div class="card-header fw-bold">Promoções</div>
-                      <div class="card-body">
-                        <ul id="lista" class="list-group mb-2">
-                          <li v-for="promocao in pessoa.promocoes" :key="promocao.id_graduacao" class="list-group-item">
-                            {{ promocao.data }} - {{ promocao.nome_graduacao }}
-                          </li>
+                    <div class="card-body">
+                      <ul id="lista" class="list-group mb-2">
+                        <li v-for="promocao in pessoa?.docs?.promocoes" :key="promocao.id_graduacao" class="list-group-item">
+                          {{ promocao.data }} - {{ promocao.nome_graduacao }}
+                        </li>
                       </ul>
                     </div>
                   </div>
-
+                </div>
+<!--
                 <div class="card mb-3 mt-4">
                   <div class="card-header fw-bold">Cobranças</div>
                       <div class="card-body">
@@ -110,8 +117,7 @@
                     </div>
                   </div>
                 </div>
-
-                
+-->
               </div>
             </div>
         </div>
@@ -135,24 +141,24 @@ const { setMensagem } = useMensagem();
 const localMessage = ref('');
 const localMessageType = ref<'success' | 'error' | 'info'>('info');
 
+// Busca a pessoa se id for fornecido
+//const { pessoa, loading, error, refresh } = await usePessoa(id);
+
+const pessoaEndpoint = computed(() => `/api/pessoas/${id}`);
+const { data: pessoa , error, pending, refresh } = await useFetch<Resposta<Pessoa>>(pessoaEndpoint, 
+  { 
+    watch: [pessoaEndpoint] 
+  });
+
+if (error.value) {
+  console.error('Erro ao buscar pessoa:', error.value);
+}
+ 
 function showMessage(text: string, type: 'success' | 'error' | 'info' = 'info') {
   localMessage.value = text;
   localMessageType.value = type;
   // keep existing global composable for consistency
   setMensagem(text, type === 'error' ? 'error' : 'success');
 }
-
-// Busca a pessoa se id for fornecido
-const { pessoa, loading, error, refresh } = await usePessoa(id);
-if (error.value) {
-  console.error('Erro ao buscar pessoa:', error.value);
-  const mensagem = error.value.data?.message 
-    || error.value.message 
-    || 'Erro ao buscar pessoa.';
-  showMessage(mensagem, 'error');
-} else {
-  const mensagem = 'Pessoa carregada com sucesso.';
-  showMessage(mensagem, 'info');
-} 
 
 </script>

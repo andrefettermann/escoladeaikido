@@ -13,6 +13,19 @@ const lookupPessoas = {
     }
 }
 
+const projectGraduacoes = {
+    $project: {
+      _id: 1,
+      nome: 1,
+      faixa: 1,
+      sequencia: 1,
+      categoria: 1,
+      minimo_horas_treino_exame: 1,
+      minimo_tempo_exame: 1
+    }
+}
+
+
 export async function find(id: string): Promise<Resposta<Graduacao>> {
   try {
     const pipeline = [
@@ -48,8 +61,12 @@ export async function find(id: string): Promise<Resposta<Graduacao>> {
 }
 
 export async function findAll(): Promise<Resposta<Graduacao[]>> {
+
   try {
-    const response = await GraduacaoSchema.aggregate([{ $sort: { sequencia: 1 } }])
+    const response = await GraduacaoSchema.aggregate([
+          projectGraduacoes,
+          { $sort: { sequencia: 1 } }
+        ])
           .allowDiskUse(true)
           .option({ maxTimeMS: 15000 })
           .exec();
@@ -65,12 +82,10 @@ export async function findAll(): Promise<Resposta<Graduacao[]>> {
         sucesso: true,
         docs: response,
     };
-  } catch (error) {
-    console.error("Erro ao buscar todas as graduacoes:", error);
+  } catch (error: any) {
     return {
         sucesso: false,
-        docs: [],
-        mensagem: 'Erro ao buscar as graduacoes.',
+        mensagem: error.message,
     };
   }
 };
