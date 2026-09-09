@@ -19,14 +19,14 @@ export const GraduacaoSchema = defineMongooseModel({
             type: String,
             required: [true, 'A categoria é obrigatória.'],
         },
-        minimo_horas_treino_exame: {
-            type: Number,
-            required: false,
-        },
-        minimo_tempo_exame: {
-            type: Number,
-            required: false,
-        },
+//        minimo_horas_treino_exame: {
+//            type: Number,
+//            required: false,
+//        },
+//        minimo_tempo_exame: {
+//            type: Number,
+//            required: false,
+//        },
         observacoes: {
             type: String,
             required: false,
@@ -34,8 +34,18 @@ export const GraduacaoSchema = defineMongooseModel({
         tecnicas: [{
             nome: {
                 type: String,
-                required: true,
+                required: false,
             }
-        }]
+        }],
+        requisitos: {
+            horas_treino: {
+                type: Number,
+                required: false,
+            },
+            meses_treino: {
+                type: Number,
+                required: false,
+            }
+        }
     }
 })

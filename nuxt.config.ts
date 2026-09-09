@@ -13,6 +13,15 @@ export default defineNuxtConfig({
     //modelsDir: 'models', // Default directory for models
   },
 
+  vite: {
+    optimizeDeps: {
+      include: [
+        '@vue/devtools-core',
+        '@vue/devtools-kit',
+      ]
+    }
+  },
+
   app: {
     head: {
       title: 'E.M.A. - Escola Meirelles de Aikidô',

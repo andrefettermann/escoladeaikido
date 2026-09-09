@@ -21,16 +21,17 @@
                             <div class="mb-3">
                                 <label for="email" class="form-label">Informe o email</label>
                                 <input type="email" class="form-control" 
-                                id="email" name="email" 
-                                placeholder="Informe o seu email" v-model="form.email">
+                                id="email" name="email" v-model="form.email"
+                                placeholder="Informe o seu email">
                             </div>
                             <div class="mb-3">
                                 <label for="senha" class="form-label">Informe a senha</label>
                                 <input type="password" class="form-control" 
-                                id="senha" name="senha" 
-                                placeholder="Informe a senha" v-model="form.senha">
+                                id="senha" name="senha" v-model="form.senha"
+                                placeholder="Informe a senha" >
                             </div>
-                            <button type="submit" class="btn btn-primary w-100">Entrar</button>
+                            <button id="entrar" name="entrar" type="submit" 
+                            class="btn btn-primary w-100" aria-label="Entrar no sistema">Entrar</button>
 
                             <!--
                             <div class="sign-up mt-4">

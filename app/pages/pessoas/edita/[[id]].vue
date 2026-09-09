@@ -254,7 +254,7 @@ const { setMensagem } = useMensagem();
 const localMessage = ref('');
 const localMessageType = ref<'success' | 'error' | 'info'>('info');
 
-const title = id ? 'Edita Pessoa' : 'Nova Pessoa';
+const title = id ? 'Edita pessoa' : 'Nova pessoa';
 const isSaving = ref(false);
 
 const dojoId = computed({
@@ -441,8 +441,9 @@ async function grava() {
   }
 
   if (!isValidDateDDMM(pessoa.aniversario || '') 
-    || !isValidDateDDMM(pessoa.data_inicio_aikido || '') 
-    || !isValidDateDDMM(pessoa.data_matricula || '')) {
+  //  || !isValidDateDDMM(pessoa.data_inicio_aikido || '') 
+  //  || !isValidDateDDMM(pessoa.data_matricula || '')
+  ) {
     showMessage('Datas devem estar no formato dd/mm ou ficar em branco.', 'error');
     return;
   }
@@ -460,16 +461,22 @@ async function grava() {
 
   try {
     isSaving.value = true;
-    await $fetch(endpoint, {
+    const resposta: Resposta = await $fetch(endpoint, {
       method,
       body: pessoa
     });
 
-    showMessage('Pessoa gravada com sucesso!', 'success');
-    await navigateTo('/pessoas', { replace: true });
+    if (resposta && resposta.sucesso) {
+      await navigateTo({
+        path: '/pessoas',
+        query: { sucesso: 'true' }
+        }, { replace: true });
+    } else {
+      // Se o backend retornou sucesso: false (caiu no catch do backend)
+      showMessage(resposta?.mensagem || 'Erro ao gravar a função', 'error');
+    }
   } catch (err: any) {
-    console.error(err);
-    showMessage(err?.data?.message || 'Erro ao gravar pessoa', 'error');
+    showMessage(err?.data?.mensagem || 'Erro ao gravar pessoa', 'error');
     isSaving.value = false;
   }
 }

@@ -7,7 +7,7 @@ const lookupPessoas = {
         localField: "_id",
         foreignField: "id_graduacao",
         pipeline: [
-            { $project: { _id: 1, nome: 1, situacao: 1 } },
+            { $project: { _id: 1, nome: 1, is_ativo: 1 } },
         ],
         as: "pessoas"
     }
@@ -30,7 +30,7 @@ export async function find(id: string): Promise<Resposta<Graduacao>> {
   try {
     const pipeline = [
         { $match: { _id: new mongoose.Types.ObjectId(id) } },
-        //lookupPessoas,
+        lookupPessoas,
         { $limit: 1 }
     ];
 
@@ -89,3 +89,22 @@ export async function findAll(): Promise<Resposta<Graduacao[]>> {
     };
   }
 };
+
+export async function create(dados: any): Promise<Resposta<any>> {
+  try {
+    dados._id = new mongoose.Types.ObjectId(); // Gera um novo ObjectId para o documento
+
+    const graduacao = new GraduacaoSchema(dados);
+    const savedGraduacao = await graduacao.save();
+
+    return {
+      sucesso: true,
+      docs: savedGraduacao,
+    };
+  } catch (error: any) {
+    return {
+      sucesso: false,
+      mensagem: error.message,
+    };
+  }
+}

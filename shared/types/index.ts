@@ -25,7 +25,7 @@ export interface Dojo {
     _id: number;
     nome: string;
     id_graduacao: string;
-    situacao: string;
+    is_ativo: boolean;
     graduacao: {
       nome: string
     }
@@ -38,14 +38,28 @@ export interface Graduacao {
   nome: string;
   faixa: string;
   categoria: string;
-  minimo_horas_treino_exame: number;
-  minimo_tempo_exame: number;
+//  minimo_horas_treino_exame: number;
+//  minimo_tempo_exame: number;
   observacoes: string;
   sequencia: number;
   tecnicas: {
-    id: number;
+    _id: string;
     nome: string;
-  }
+  }[];
+  requisitos: {
+    horas_treino: number;
+    meses_treino: number;
+  };
+  pessoas?: {
+    _id: string;
+    nome: string;
+    id_graduacao: string;
+    situacao: string;
+    is_ativo: boolean;
+    graduacao: {
+      nome: string
+    }
+  }[];
 }
 
 export interface Pessoa {
@@ -61,7 +75,7 @@ export interface Pessoa {
     id_graduacao: string
     nome_graduacao: string;
   }[];
-  dojo: {
+  dojo?: {
     _id: string;
     nome: string;
   }

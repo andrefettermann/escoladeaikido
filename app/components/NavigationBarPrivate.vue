@@ -23,7 +23,7 @@
                         <ul class="nav navbar-nav ms-auto"> 
 
                             <li class="nav-item">
-                                <nuxt-link id="pessoas" name="pessoas" 
+                                <nuxt-link id="menu_pessoas" name="menu_pessoas" 
                                 class="nav-link" active-class="active bg-primary text-white rounded"
                                 aria-current="page"
                                 aria-label="Acessar a página de pessoas cadastradas"

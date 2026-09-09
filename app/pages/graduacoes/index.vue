@@ -66,8 +66,8 @@
               <th scope="row">{{ graduacao.nome }}</th>
               <td>{{ graduacao.faixa? graduacao.faixa.charAt(0).toUpperCase() + graduacao.faixa.slice(1):'N/A' }}</td>
               <td>{{ graduacao.categoria }}</td>
-              <td>{{ graduacao.minimo_horas_treino_exame }}</td>
-              <td>{{ graduacao.minimo_tempo_exame }}</td>
+              <td>{{ graduacao.requisitos?.horas_treino }}</td>
+              <td>{{ graduacao.requisitos?.meses_treino }}</td>
               <td>
                 <div v-if="(user as any)?.role != 'admin'" class="d-flex gap-2">
                   <nuxt-link
@@ -105,11 +105,22 @@ definePageMeta({
   middleware: ['authenticated']
 })
 
+const router = useRouter();
 const { user } = useUserSession()
 const route = useRoute();
-/*
-const { mensagem, tipo, limparMensagem } = useMensagem();
-*/
+const { setMensagem } = useMensagem();
+const localMessage = ref('');
+const localMessageType = ref<'success' | 'error' | 'info'>('info');
+
+onMounted(() => {
+  // Se existir o parâmetro "gravado=true" na URL
+  if (route.query.sucesso === 'true') {
+    showMessage('Graduação gravada com sucesso!', 'success');
+    
+    // Opcional: Limpa a URL para remover o "?gravado=true" de forma discreta
+    router.replace({ query: {} });
+  }
+});
 
 // Computed para determinar qual endpoint usar baseado nos query params
 const endpoint = computed(() => { return '/api/graduacoes'; });
@@ -155,5 +166,12 @@ const graduacoesFiltradas = computed(() => {
     return textoCompleto.includes(valorFiltro);
   });
 });
+
+function showMessage(text: string, type: 'success' | 'error' | 'info' = 'info') {
+  localMessage.value = text;
+  localMessageType.value = type;
+  // keep existing global composable for consistency
+  setMensagem(text, type === 'error' ? 'error' : 'success');
+}
 
 </script>

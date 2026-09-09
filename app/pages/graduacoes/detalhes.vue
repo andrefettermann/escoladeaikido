@@ -4,11 +4,11 @@
     <div class="mb-2 d-flex gap-2 fw-semibold">
 
         <nuxt-link id="edita" name="edita" class="btn btn-primary btn-sm m-1"
-        :to="{ path: `/dojos/edita/${id}` }"
-        :aria-label="`Editar dados de ${dojo?.nome}`">Edita</nuxt-link>
+        :to="{ path: `/graduacoes/edita/${id}` }"
+        :aria-label="`Editar dados de ${graduacao?.nome}`">Edita</nuxt-link>
 
         <nuxt-link id="cancela" name="cancela" 
-        class="btn btn-warning btn-sm m-1" :to="`/dojos`">Cancela</nuxt-link>
+        class="btn btn-warning btn-sm m-1" :to="`/graduacoes`">Cancela</nuxt-link>
 
     </div>
 
@@ -23,7 +23,7 @@
 
     <div class="card">
       <div class="card-header fw-bold">
-        <span>{{ dojo?.nome }}</span>
+        <span>{{ graduacao?.nome }}</span>
       </div>
       <div class="card-body">
           <div class="row">
@@ -38,79 +38,66 @@
                   <button @click="() => refresh()" class="btn">Tentar novamente</button>
                 </div>
 
-                <div v-else-if="dojo" class="col">
+                <div v-else-if="graduacao" class="col">
                   <div class="row mb-2">
                     <div class="col">
-                      <strong>Local:</strong> {{ dojo.local }}
+                      <strong>Faixa:</strong> {{ graduacao.faixa }}
                     </div>
                   </div>
                   <div class="row mb-2">
                     <div class="col">
-                      <strong>Endereço:</strong> {{ dojo.endereco }}
+                      <strong>Categoria:</strong> {{ graduacao.categoria }}
                     </div>
                   </div>
                   <div class="row mb-2">
                     <div class="col">
-                      <strong>Cidade:</strong> {{ dojo.cidade }}
+                      <strong>Observações:</strong> {{ graduacao.observacoes || 'N/A' }}
                     </div>
                   </div>
                   <div class="row mb-2">
                     <div class="col">
-                      <strong>UF:</strong> {{ dojo.uf }}
+                      <strong>Requisitos para exame:</strong>
                     </div>
                   </div>
                   <div class="row mb-2">
                     <div class="col">
-                      <strong>País:</strong>
-                      {{ dojo.pais || 'N/A' }}
+                      <strong>Qtde horas de treino na graduação anterior:</strong> 
+                      {{ graduacao.requisitos?.horas_treino || 'N/A' }}
                     </div>
                   </div>
                   <div class="row mb-2">
                     <div class="col">
-                      <strong>URL:</strong>
-                      {{ dojo.url || 'N/A' }}
+                      <strong>Qtde meses de treino na graduação anterior:</strong>
+                      {{ graduacao.requisitos?.meses_treino || 'N/A' }}
                     </div>
                   </div>
-                  <div class="row mb-2">
-                    <div class="col">
-                      <strong>E-mail:</strong>
-                      {{ dojo.email || 'N/A' }}
-                    </div>
-                  </div>
-                </div>
-                <div class="row mb-2">
-                  <div class="col">
-                    <strong>Em atividade?</strong> {{ dojo?.is_ativo?'Sim':'Não' }}
-                  </div>
-                </div>
               </div>
-
-
             </div>
         </div>
+      </div>
     </div>
 
     <div class="card mt-3">
-      <div class="card-header fw-bold">Professores e horários</div>
+      <div class="card-header fw-bold">Técnicas</div>
       <div class="card-body">
-        <ul id="horarios" name="horarios" aria-label="Professores e horários" 
+        <ul id="tecnicas" name="tecnicas" aria-label="Técnicas" 
         class="list-group mb-2 list-group-flush">
-          <li v-for="horario in dojo?.horarios" :key="horario._id" 
+          <li v-for="tecnica in graduacao?.tecnicas" :key="tecnica._id" 
           class="list-group-item">
-            {{ horario.horario }} ({{ horario.nome_professor }})
+            {{ tecnica.nome }}
           </li>
         </ul>
       </div>
     </div>
 
     <div class="card mt-3">
-      <div class="card-header fw-bold">Alunos ({{dojo?.alunos?.length}})</div>
+      <div class="card-header fw-bold">Alunos ({{graduacao?.pessoas?.length}})</div>
       <div class="card-body">
         <ul id="alunos" name="alunos" aria-label="Alunos" 
         class="list-group mb-2 list-group-flush">
-          <li v-for="aluno in dojo?.alunos" :key="aluno._id" 
+          <li v-for="pessoas in graduacao?.pessoas" :key="pessoas._id" 
           class="list-group-item">
-            {{ aluno.nome }} - {{ aluno.graduacao.nome }} ({{ aluno.is_ativo ? 'Ativo' : 'Inativo' }})
+            {{ pessoas.nome }} ({{ pessoas.is_ativo ? 'Ativo' : 'Inativo' }})
           </li>
         </ul>
       </div>
@@ -134,26 +121,26 @@ const localMessageType = ref<'success' | 'error' | 'info'>('info');
 
 // Computed para determinar qual endpoint usar baseado nos query params
 const endpoint = computed(() => {
-    return `/api/dojos/${id}`;
+    return `/api/graduacoes/${id}`;
 });
 
 // Busca os dados através da API route do servidor
 // O watch: ['endpoint'] faz o refetch automático quando a rota mudar
-const { data, pending, error, refresh } = await useFetch<Resposta<Dojo>>(endpoint, {
+const { data, pending, error, refresh } = await useFetch<Resposta<Graduacao>>(endpoint, {
   watch: [endpoint]
 })
 
-var dojo: Dojo | undefined;
+var graduacao: Graduacao | undefined;
 if (error.value) {
-  console.error('Erro ao buscar pessoa:', error.value);
+  console.error('Erro ao buscar a graduacao:', error.value);
   const mensagem = error.value.data?.message 
     || error.value.message 
-    || 'Erro ao buscar pessoa.';
+    || 'Erro ao buscar graduação.';
   showMessage(mensagem, 'error');
 } else {
-  const mensagem = 'Dojo carregado com sucesso.';
+  const mensagem = 'Graduação carregada com sucesso.';
   showMessage(mensagem, 'info');
-  dojo = data.value?.docs;
+  graduacao = data.value?.docs;
 } 
 
 function showMessage(text: string, type: 'success' | 'error' | 'info' = 'info') {

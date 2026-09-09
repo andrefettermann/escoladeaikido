@@ -89,7 +89,7 @@
                 <div class="row mb-2">
                   <div class="col">
                       <strong>Dojo:</strong>
-                      {{ pessoa?.docs?.dojo.nome }}
+                      {{ pessoa?.docs?.dojo?.nome }}
                   </div>
                 </div>
 

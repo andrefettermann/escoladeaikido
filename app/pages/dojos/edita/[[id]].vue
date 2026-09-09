@@ -172,13 +172,15 @@
                         :name="`id_horario_professor_${index + 1}`" 
                         class="form-select" 
                         aria-label="Professor" 
+                        :disabled="carregandoProfessores"
                         required
                         v-model="horario.id_professor">
-                        <option value="" selected>Selecione</option>
-                        <option v-for="item in items" :key="item.value" 
-                              :value="item.value">
-                                {{ item.label }}
-                              </option>
+                        <option v-if="carregandoProfessores" value="">Carregando...</option>
+                        <option v-else value="" selected>Selecione</option>
+                        <option v-for="item in itemsProfessores" 
+                        :key="item.value" :value="item.value">
+                          {{ item.label }}
+                        </option>
                       </select>
                     </div>
 
@@ -266,11 +268,17 @@ if (id) {
 
 // Inicia os professores
 const professoresEndpoint = '/api/pessoas/tipo/professor';
-const { data: dataProfessores, pending: pendingProfessores } = 
-                      await useFetch<{ docs: any }>(professoresEndpoint);
+//const { data: dataProfessores, pending: pendingProfessores } = 
+//                      await useFetch<{ docs: any }>(professoresEndpoint);
 
-const items = computed(() => {
-  const docs = dataProfessores.value?.docs || [];
+const { dadosProfessores, carregandoProfessores } = useFetchProfessores (
+  professoresEndpoint, {
+    onError: (msg: string) => showMessage(msg, 'error')
+  }
+)
+
+const itemsProfessores = computed(() => {
+  const docs = dadosProfessores.value?.docs || [];
   return docs.map((prof: any) => ({ label: `${prof.nome}`, value: prof.id }));
 });
 
@@ -298,16 +306,24 @@ async function grava() {
 
   try {
     isSaving.value = true;
-    await $fetch(endpoint, {
+    const resposta: Resposta = await $fetch(endpoint, {
       method,
       body: dojo
     });
 
-    showMessage('Dojo gravado com sucesso!', 'success');
-    await navigateTo('/dojos', { replace: true });
+    if (resposta && resposta.sucesso) {
+      //showMessage(resposta.mensagem || 'Cessionário gravado com sucesso!', 'success');
+      await navigateTo({
+        path: '/dojos',
+        query: { sucesso: 'true' }
+        }, { replace: true });
+    } else {
+      // Se o backend retornou sucesso: false (caiu no catch do backend)
+      showMessage(resposta?.mensagem || 'Erro ao gravar a função', 'error');
+    }
   } catch (err: any) {
     console.error(err);
-    showMessage(err?.data?.message || 'Erro ao gravar dojo', 'error');
+    showMessage(err?.data?.mensagem || 'Erro ao gravar dojo', 'error');
   } finally {
     isSaving.value = false;
   }

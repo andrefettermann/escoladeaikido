@@ -126,10 +126,22 @@ definePageMeta({
 })
 
 const { user } = useUserSession()
+const router = useRouter();
 const route = useRoute();
-/*
-const { mensagem, tipo, limparMensagem } = useMensagem();
-*/
+const { setMensagem } = useMensagem();
+const localMessage = ref('');
+const localMessageType = ref<'success' | 'error' | 'info'>('info');
+
+onMounted(() => {
+  // Se existir o parâmetro "gravado=true" na URL
+  if (route.query.sucesso === 'true') {
+    showMessage('Dojo gravado com sucesso!', 'success');
+    
+    // Opcional: Limpa a URL para remover o "?gravado=true" de forma discreta
+    router.replace({ query: {} });
+  }
+});
+
 
 // Computed para determinar qual endpoint usar baseado nos query params
 const endpoint = computed(() => {
@@ -193,5 +205,13 @@ const dojosFiltrados = computed(() => {
     return textoCompleto.includes(valorFiltro);
   });
 });
+
+function showMessage(text: string, type: 'success' | 'error' | 'info' = 'info') {
+  localMessage.value = text;
+  localMessageType.value = type;
+  // keep existing global composable for consistency
+  setMensagem(text, type === 'error' ? 'error' : 'success');
+}
+
 
 </script>

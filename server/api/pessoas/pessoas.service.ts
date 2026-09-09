@@ -234,13 +234,13 @@ function preparaDadosGravacao(osDados: any): any {
     })
 
     const doc = {
-        'id': osDados.id,
+        //'id': osDados.id,
         'aniversario': osDados.aniversario,
         'matricula': osDados.matricula,
         'nome': osDados.nome==''?osDados.nome:encripta(osDados.nome),
         'is_ativo': osDados.is_ativo,
         'cpf': osDados.cpf===''?'':encripta(osDados.cpf),
-        'data_inicio_aikido': osDados.data_inicio,
+        'data_inicio_aikido': osDados.data_inicio_aikido,
         'data_matricula': osDados.data_matricula,
         'tipo': osDados.tipo,
         'id_dojo': osDados.dojo._id == ''?null:osDados.dojo._id,

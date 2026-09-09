@@ -11,21 +11,21 @@
     </div>
 
     <div>
-      <h1 class="fs-3 fw-bold">Pessoas cadastradas</h1>
+      <h1 id="titulo" class="fs-3 fw-bold">Pessoas cadastradas</h1>
       <p class="fs-6 text-secondary">Gerencie as pessoas cadastradas na escola, 
         incluindo alunos, professores e outros membros.</p>
     </div>
 
     <div>
-      <input class="form-control mt-2 mb-2" id="myInput" type="text" 
+      <input class="form-control mt-2 mb-2" id="filtrarPor" name="filtrarPor" type="text" 
       placeholder="Filtrar.." v-model="filtro" aria-label="Filtrar as pessoas exibidas" />
     </div>
 
     <span v-if="tituloFiltro"> {{ tituloFiltro }} 
-        Total encontrado: {{ pessoasFiltradas.length }}</span>
+        Total encontrado: <span id="total">{{ pessoasFiltradas.length }}</span></span>
 
     <div v-if="pending" class="text-center">
-      <p class="mb-4">Carregando dados...</p>
+      <p id="carregando" class="mb-4">Carregando dados...</p>
       <div class="w-full bg-gray-200 rounded-full h-6 overflow-hidden" 
       role="progressbar" aria-label="Animated striped example" aria-valuenow="75" 
       aria-valuemin="0" aria-valuemax="100">
@@ -70,7 +70,6 @@
 
       </div>
 
-
       <div class="table-responsive" role="region" aria-label="Tabela de pessoas" tabindex="0">
 
         <table id="lista" class="table table-striped table-hover align-middle">
@@ -88,7 +87,7 @@
               <th scope="col">Ações</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody id="linhas" name="linhas">
             <tr v-if="pessoasFiltradas.length === 0">
               <td colspan="7" class="text-center text-secondary py-3">
                 Nenhuma pessoa encontrada
@@ -152,11 +151,24 @@ definePageMeta({
 
 // Mensagem composable
 const { setMensagem } = useMensagem();
+const localMessage = ref('');
+const localMessageType = ref<'success' | 'error' | 'info'>('info');
 
+const router = useRouter();
 const { user } = useUserSession()
 const route = useRoute();
-
 const mesCorrente = new Date().getMonth() + 1;
+
+onMounted(() => {
+  // Se existir o parâmetro "gravado=true" na URL
+  if (route.query.sucesso === 'true') {
+    showMessage('Pessoa gravada com sucesso!', 'success');
+    
+    // Opcional: Limpa a URL para remover o "?gravado=true" de forma discreta
+    router.replace({ query: {} });
+  }
+});
+
 
 // Computed para determinar qual endpoint usar baseado nos query params
 const endpoint = computed(() => {
@@ -179,24 +191,12 @@ const endpoint = computed(() => {
   return '/api/pessoas';
 });
 
-const localMessage = ref('');
-const localMessageType = ref<'success' | 'error' | 'info'>('info');
-
-
 // Busca os dados através da API route do servidor
 // O watch: ['endpoint'] faz o refetch automático quando a rota mudar
 const { data, pending, error, refresh } = useFetch<Resposta<Pessoa[]>>(endpoint,
 { 
     watch: [endpoint] 
 });
-
-
-if (error.value) {
-  console.error('Erro ao buscar pessoas:', error.value);
-} else {
-//  const mensagem = 'Pessoas carregadas com sucesso.';
-//  showMessage(mensagem, 'info');
-}
 
 // Computed para o título do filtro aplicado
 const tituloFiltro = computed(() => {

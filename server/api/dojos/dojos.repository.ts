@@ -13,6 +13,9 @@ const projectDojos = {
         is_ativo: 1,
         horarios: 1,
         alunos: 1,
+        pais: 1,
+        url: 1,
+        email: 1
     }
 }
 
@@ -22,7 +25,7 @@ const lookupAlunos = {
         let: { dojoId: "$_id" },
         pipeline: [
             { $match: { $expr: { $eq: ["$id_dojo", "$$dojoId"] } } },
-            { $project: { _id: 1, nome: 1, id_graduacao: 1, situacao: 1 } }
+            { $project: { _id: 1, nome: 1, id_graduacao: 1, is_ativo: 1 } }
         ],
         as: "alunos"
     }
