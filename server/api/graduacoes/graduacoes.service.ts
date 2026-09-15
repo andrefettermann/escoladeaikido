@@ -28,7 +28,7 @@ export async function buscaPeloId(id: string): Promise<Resposta<Graduacao>> {
 }
 
 export async function buscaTodos(): Promise<Resposta<Graduacao[]>> {
-  const resposta = await GraduacoesRepository.findAll();//.then(res => res.docs);    
+  const resposta = await GraduacoesRepository.findAll();//.then(res => res.docs);
 
   return resposta;
 };
@@ -64,9 +64,43 @@ export async function cria(event: any): Promise<Resposta<Graduacao>> {
     };
   }
 
-  //const dados = preparaDadosGravacao(body);
-console.log('Dados recebidos para criação da graduação:', body);
   const resposta = await GraduacoesRepository.create(body);
+
+  return resposta;
+}
+
+export async function atualiza(event: any, id: string): Promise<Resposta<Graduacao>> {
+  const body = await readBody(event);
+
+  if (!body.nome) {
+    return {
+      sucesso: false,
+      mensagem: 'Nome da graduação é obrigatório',
+    };
+  }
+
+  if (!body.faixa) {
+    return {
+      sucesso: false,
+      mensagem: 'Faixa da graduação é obrigatória',
+    };
+  }
+
+  if (!body.sequencia) {
+    return {
+      sucesso: false,
+      mensagem: 'Sequência da graduação é obrigatória',
+    };
+  }
+
+  if (!body.categoria) {
+    return {
+      sucesso: false,
+      mensagem: 'Categoria da graduação é obrigatória',
+    };
+  }
+
+  const resposta = await GraduacoesRepository.update(id, body);
 
   return resposta;
 }

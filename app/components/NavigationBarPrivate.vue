@@ -26,6 +26,7 @@
                                 <nuxt-link id="menu_pessoas" name="menu_pessoas" 
                                 class="nav-link" active-class="active bg-primary text-white rounded"
                                 aria-current="page"
+                                title="Acessar a página de pessoas cadastradas"
                                 aria-label="Acessar a página de pessoas cadastradas"
                                 :to = " { path: '/pessoas' } ">
                                     Pessoas
@@ -36,6 +37,8 @@
                                 <nuxt-link id="dojos" name="dojos" 
                                 class="nav-link" active-class="active bg-primary text-white rounded"
                                 aria-current="page"
+                                title="Acessar a página de dojos"
+                                aria-label="Acessar a página de dojos"
                                 :to = " { path: '/dojos' } ">
                                     Dojos
                                 </nuxt-link>
@@ -45,6 +48,8 @@
                                 <nuxt-link id="graduacoes" name="graduacoes" 
                                 class="nav-link" active-class="active bg-primary text-white rounded"
                                 aria-current="page"
+                                title="Acessar a página de graduações"
+                                aria-label="Acessar a página de graduações"
                                 :to = " { path: '/graduacoes' } ">
                                     Graduações
                                 </nuxt-link>
@@ -52,6 +57,8 @@
                             
                             <li class="nav-item dropdown">
                                 <nuxt-link id="financeiro" name="financeiro" 
+                                title="Acessar a página de financeiro"
+                                aria-label="Acessar a página de financeiro"
                                 class="nav-link dropdown-toggle" href="#" 
                                 role="button" data-bs-toggle="dropdown" 
                                 aria-expanded="false">
@@ -66,7 +73,7 @@
                                         </nuxt-link>
                                     </li>
                                     <li>
-                                        <nuxt-link id="menu-cobrancas" name="menu-cobrancas" 
+                                        <nuxt-link id="cobrancas" name="cobrancas" 
                                         :to=" { path: '/cobrancas' } " 
                                         class="nav-link" aria-current="page">
                                             Cobranças

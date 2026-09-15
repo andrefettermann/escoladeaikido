@@ -28,7 +28,8 @@
               <label for="sequencia" class="col-form-label">*Sequência</label>
             </div>
             <div class="col-1">
-              <input type="text" class="form-control" id="sequencia" name="sequencia" v-model="graduacao.sequencia"
+              <input type="text" class="form-control" id="sequencia" 
+              name="sequencia" v-model="graduacao.sequencia"
               placeholder="A sequência da graduacao"/>
             </div>
           </div>
@@ -38,9 +39,9 @@
             <div class="col-2">
               <label for="nome" class="col-form-label">*Nome</label>
             </div>
-            <div class="col-1">
-              <input type="text" class="form-control" id="nome" name="nome" v-model="graduacao.nome"
-              placeholder="O nome da graduacao"/>
+            <div class="col-2">
+              <input type="text" class="form-control" id="nome" name="nome" 
+              v-model="graduacao.nome" placeholder="O nome da graduacao"/>
             </div>
           </div>
 
@@ -50,8 +51,9 @@
               <label for="faixa" class="col-form-label">*Faixa</label>
             </div>
             <div class="col-2">
-              <input type="text" class="form-control" id="faixa" name="faixa" v-model="graduacao.faixa"
-              placeholder="A faixa da graduacao" size="10" data-toggle="tooltip" data-placement="top" 
+              <input type="text" class="form-control" id="faixa" name="faixa" 
+              v-model="graduacao.faixa" placeholder="A faixa da graduacao" 
+              size="10" data-toggle="tooltip" data-placement="top" 
               title="A faixa da graduacao">
             </div>
           </div>
@@ -96,8 +98,8 @@
               name="horas_treino" v-model="graduacao.requisitos.horas_treino"
               placeholder="Quantidade de horas de treino" size="10" 
               data-toggle="tooltip" data-placement="top" 
-              aria-label="A quantidde de horas de treino na graduação anterior para o exame da graduação atual"
-              title="A quantidde de horas de treino na graduação anterior para o exame da graduação atual">
+              aria-label="A quantidde de horas de treino na graduação anterior para o exame para esta graduação"
+              title="A quantidde de horas de treino na graduação anterior para o exame para esta graduação">
             </div>
           </div>
         
@@ -111,8 +113,8 @@
               name="meses_treino" v-model="graduacao.requisitos.meses_treino"
               placeholder="Quantidade de meses de treino" size="10" 
               data-toggle="tooltip" data-placement="top" 
-              aria-label="A quantidade de meses de treino na graduação anterior para o exame da graduação atual"
-              title="A quantidade de meses de treino na graduação anterior para o exame da graduação atual">
+              aria-label="A quantidade de meses de treino na graduação anterior para o exame para esta graduação"
+              title="A quantidade de meses de treino na graduação anterior para o exame para esta graduação">
             </div>
           </div>
 
@@ -189,12 +191,16 @@ const localMessageType = ref<'success' | 'error' | 'info'>('info');
 const title = id ? 'Edita graduação' : 'Nova graduação';
 const isSaving = ref(false);
 
+const query = route.query;
+const sequencia = query.sequencia as string;
+
+
 // Reactive graduacao object
 const graduacao = reactive<Graduacao>({
   _id: '',
   nome: '',
   faixa: '',
-  sequencia: 0,
+  sequencia: sequencia ? parseInt(sequencia) : 0,
   categoria: '',
   requisitos: {
     horas_treino: 0,
@@ -291,12 +297,11 @@ async function grava() {
         }, { replace: true });
     } else {
       // Se o backend retornou sucesso: false (caiu no catch do backend)
-      showMessage(resposta?.mensagem || 'Erro ao gravar a função', 'error');
+      showMessage(resposta?.mensagem || 'Erro ao gravar a graduação', 'error');
     }
 
   } catch (err: any) {
-    console.error(err);
-    showMessage(err?.data?.mensagem || 'Erro ao gravar graduacao', 'error');
+    showMessage(err || 'Erro ao gravar graduacao', 'error');
     isSaving.value = false;
   }
 }

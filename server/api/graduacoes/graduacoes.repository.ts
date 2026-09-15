@@ -20,8 +20,10 @@ const projectGraduacoes = {
       faixa: 1,
       sequencia: 1,
       categoria: 1,
-      minimo_horas_treino_exame: 1,
-      minimo_tempo_exame: 1
+      requisitos: {
+        horas_treino: 1,
+        meses_treino: 1,
+      }
     }
 }
 
@@ -100,6 +102,36 @@ export async function create(dados: any): Promise<Resposta<any>> {
     return {
       sucesso: true,
       docs: savedGraduacao,
+    };
+  } catch (error: any) {
+    return {
+      sucesso: false,
+      mensagem: error.message,
+    };
+  }
+}
+
+export async function update(id: string, dados: any): Promise<Resposta<any>> {
+  try {
+    const updatedGraduacao = await GraduacaoSchema.findByIdAndUpdate(
+      id,
+      dados,
+      {
+            returnDocument: 'after',
+            runValidators: true
+      }
+    );
+
+    if (!updatedGraduacao) {
+      return {
+        sucesso: false,
+        mensagem: 'Graduação não encontrada para atualização.',
+      };
+    }
+
+    return {
+      sucesso: true,
+      docs: updatedGraduacao,
     };
   } catch (error: any) {
     return {

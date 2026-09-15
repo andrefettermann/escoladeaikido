@@ -41,30 +41,41 @@
     <div v-else-if="pessoasFiltradas && pessoasFiltradas.length > 0">
     
       <div class="mb-2">
-        <nuxt-link id="botao_nova_pessoa" name="botao_nova_pessoa" 
+        <nuxt-link id="incluir" name="incluir" title="Incluir pessoa"
+            aria-label="Incluir pessoa"
             class="btn btn-success btn-sm m-1" href="/pessoas/edita">
               Incluir pessoa
         </nuxt-link>
 
         <NuxtLink id="todas" name="todas" 
+          aria-label="Exibir todas as pessoas cadastradas"
+          title="Exibir todas as pessoas cadastradas"
           class="btn btn-primary btn-sm m-1" 
           to="/pessoas">Todos</NuxtLink>
         
         <NuxtLink id="ativas" name="ativas" 
+          aria-label="Exibir pessoas em atividade"
+          title="Exibir pessoas em atividade"
           class="btn btn-primary btn-sm m-1" 
           to="/pessoas?situacao=ativo">Em atividade</NuxtLink>
 
         <NuxtLink id="inativas" name="inativas" 
+          aria-label="Exibir pessoas inativas"
+          title="Exibir pessoas inativas"
           class="btn btn-primary btn-sm m-1" 
           to="/pessoas?situacao=inativo">Inativas</NuxtLink>
 
         <NuxtLink id="aniversariantes" 
           name="aniversariantes" 
+          aria-label="Exibir aniversariantes do mês"
+          title="Exibir aniversariantes do mês"
           class="btn btn-primary btn-sm m-1" 
           :to="`/pessoas?mes=${mesCorrente}`">Aniversariantes do mês
         </NuxtLink>
 
         <NuxtLink id="professores" name="professores" 
+          aria-label="Exibir professores"
+          title="Exibir professores"
           class="btn btn-primary btn-sm m-1" 
           to="/pessoas?tipo=professor">Professores</NuxtLink>
 
@@ -110,20 +121,17 @@
               <td>{{ pessoa.dojo?.nome ? pessoa.dojo?.nome : 'N/A' }}</td>
               <td>
                 <div v-if="(user as any)?.role != 'admin'" class="d-flex gap-2">
-                  <nuxt-link
+                  <nuxt-link title="Ver detalhes da pessoa" 
                     :id="`detalhes_pessoa_${pessoa._id}`"
-                    class="link-primary fw-semibold"
+                    class="btn btn-primary btn-sm m-1"
                     :to="`/pessoas/detalhes?id=${pessoa._id}`"
                     :aria-label="`Ver detalhes de ${pessoa.nome}`"
-                  >
-                    Ver
-                  </nuxt-link>
-                  <nuxt-link
+                  >Ver</nuxt-link>
+                  <nuxt-link title="Editar os dados da pessoa"
                     :id="`edita_pessoa_${pessoa._id}`"
-                    class="link-primary fw-semibold"
+                    class="btn btn-primary btn-sm m-1"
                     :to="{ path: `/pessoas/edita/${pessoa._id}` }"
-                    :aria-label="`Editar dados de ${pessoa.nome}`">
-                    Editar
+                    :aria-label="`Editar dados de ${pessoa.nome}`">Editar
                   </nuxt-link>
                 </div>
               </td>

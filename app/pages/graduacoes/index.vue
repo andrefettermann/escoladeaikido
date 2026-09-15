@@ -33,10 +33,13 @@
     <div v-else-if="graduacoesFiltradas && graduacoesFiltradas.length > 0">
     
       <div class="mb-2">
-        <nuxt-link id="nova" name="nova" 
-          class="btn btn-success btn-sm m-1" href="/graduacoes/edita">
-          Incluir graduação</nuxt-link>
-      </div>
+        <nuxt-link id="incluir" name="incluir" title="Incluir graduação"
+            aria-label="Incluir graduação"
+            class="btn btn-success btn-sm m-1" 
+            :to="{ path: '/graduacoes/edita', query: { sequencia: ultimaSequencia ? ultimaSequencia + 1 : 1 } }">
+              Incluir graduação
+        </nuxt-link>
+      </div> 
 
       <div class="table-responsive" role="region" 
       aria-label="Tabela de graduações" tabindex="0">
@@ -48,11 +51,12 @@
           </caption>
           <thead>
             <tr>
+              <th scope="col">Sequência</th>
               <th scope="col">Nome</th>
               <th scope="col">Faixa</th>
               <th scope="col">Categoria</th>
               <th scope="col">Horas de treino para exame</th>
-              <th scope="col">Tempo mínimo para exame (meses)</th>
+              <th scope="col">Meses de treino para exame</th>
               <th scope="col">Ações</th>
             </tr>
           </thead>
@@ -63,7 +67,8 @@
               </td>
             </tr>
             <tr v-for="graduacao in graduacoesFiltradas" :key="graduacao._id">
-              <th scope="row">{{ graduacao.nome }}</th>
+              <th scope="row">{{ graduacao.sequencia }}</th>
+              <td>{{ graduacao.nome }}</td>
               <td>{{ graduacao.faixa? graduacao.faixa.charAt(0).toUpperCase() + graduacao.faixa.slice(1):'N/A' }}</td>
               <td>{{ graduacao.categoria }}</td>
               <td>{{ graduacao.requisitos?.horas_treino }}</td>
@@ -77,7 +82,7 @@
                     :aria-label="`Ver detalhes de ${graduacao.nome}`">Ver</nuxt-link>
 
                   <nuxt-link
-                    :id="`edita_dojo_${graduacao._id}`"
+                    :id="`edita_${graduacao._id}`"
                     class="btn btn-primary btn-sm m-1"
                     :to="{ path: `/graduacoes/edita/${graduacao._id}` }"
                     :aria-label="`Editar dados de ${graduacao.nome}`">Editar
@@ -122,7 +127,7 @@ onMounted(() => {
   }
 });
 
-// Computed para determinar qual endpoint usar baseado nos query params
+// Computed para determinar qual endpoint usar
 const endpoint = computed(() => { return '/api/graduacoes'; });
 
 // Busca os dados através da API route do servidor
@@ -132,6 +137,18 @@ const { data, pending, error, refresh } = useFetch<Resposta<Graduacao[]>>(endpoi
     watch: [endpoint] 
   }
 );
+
+const ultimaSequencia = computed(() => {
+  const docs = data.value?.docs;
+  if (!docs || docs.length === 0) return null;
+
+  // Ordena as graduações pela sequência em ordem decrescente
+  const ordenadas = [...docs].sort((a, b) => (b.sequencia ?? 0) - (a.sequencia ?? 0));
+  const maior = ordenadas[0];
+
+  return maior?.sequencia ?? null;
+});
+
 
 // Computed para o título do filtro aplicado
 const tituloFiltro = computed(() => {
@@ -155,12 +172,13 @@ const graduacoesFiltradas = computed(() => {
   return data.value.docs.filter((graduacao: any) => {
     const textoCompleto = [
       graduacao._id,
+      graduacao.sequencia,
       graduacao.nome,
       graduacao.faixa,
       graduacao.endereco,
       graduacao.categoria,
-      graduacao.minimo_horas_treino_exame,
-      graduacao.minimo_tempo_exame
+      graduacao.requisitos.horas_treino,
+      graduacao.requisitos.meses_treino
     ].join(' ').toLowerCase();
     
     return textoCompleto.includes(valorFiltro);

@@ -1,7 +1,7 @@
 <template>
   <div class="container pt-3 w-100">
     <div class="card">
-      <div class="card-header fw-bold">{{ title }}</div>
+      <div id="titulo" name="titulo" aria-label="titulo" class="card-header fw-bold">{{ title }}</div>
       <div class="card-body">
 
         <form id="formulario" @submit.prevent="grava">
@@ -18,7 +18,7 @@
             <strong v-if="localMessageType === 'error'">Erro:</strong>
             <strong v-else-if="localMessageType === 'success'">Ok:</strong>
             <strong v-else>Info:</strong>
-            <span class="ms-1">{{ localMessage }}</span>
+            <span id="mensagem" name="mensagem" class="ms-1">{{ localMessage }}</span>
             <button type="button" class="btn-close" @click="localMessage = ''" aria-label="Fechar"></button>
           </div>
 
@@ -28,8 +28,8 @@
               <label for="nome" class="col-form-label">*Nome</label>
             </div>
             <div class="col">
-              <input type="text" class="form-control" id="nome" name="nome" v-model="pessoa.nome"
-              placeholder="O nome da pessoa"/>
+              <input type="text" class="form-control" id="nome" name="nome" 
+              v-model="pessoa.nome" placeholder="O nome da pessoa"/>
             </div>
           </div>
 
@@ -39,8 +39,10 @@
               <label for="matricula" class="col-form-label">Matrícula</label>
             </div>
             <div class="col-1">
-              <input type="text" class="form-control" id="matricula" name="matricula" v-model="pessoa.matricula"
-              placeholder="O número de matrícula na FEPAI" size="10" data-toggle="tooltip" data-placement="top" 
+              <input type="text" class="form-control" id="matricula" 
+              name="matricula" v-model="pessoa.matricula"
+              placeholder="O número de matrícula na FEPAI" size="10" 
+              data-toggle="tooltip" data-placement="top" 
               title="O número de matrícula na FEPAI">
             </div>
           </div>
@@ -51,8 +53,9 @@
               <label for="cpf" class="col-form-label">CPF</label>
             </div>
             <div class="col-3">
-              <input type="text" class="form-control" id="cpf" name="cpf" v-model="pessoa.cpf"
-              placeholder="O número do CPF" data-toggle="tooltip" data-placement="top" 
+              <input type="text" class="form-control" id="cpf" name="cpf" 
+              v-model="pessoa.cpf" placeholder="O número do CPF" 
+              data-toggle="tooltip" data-placement="top" 
               title="O número do CPF no formato 999.999.999-99">
             </div>
           </div>
@@ -60,7 +63,8 @@
           <!--Graduacao atual-->
           <div class="form-group row mb-3">
             <div class="col-2">
-              <label for="graduacao_atual" class="col-form-label">*Graduação atual</label>
+              <label for="graduacao_atual" class="col-form-label">
+                *Graduação atual</label>
             </div>
             <div class="col-2">
               <div v-if="carregandoGraduacoes">Carregando...</div>
@@ -87,7 +91,6 @@
               name="is_ativo" v-model="pessoa.is_ativo" >
             </div>
           </div>
-        
 
           <!-- Aniversario -->
           <div class="form-group row mb-3">
@@ -95,16 +98,18 @@
               <label for="aniversario" class="col-form-label">Aniversário</label>
             </div>
             <div class="col-1">
-              <input type="text" class="form-control" id="aniversario" name="aniversario" v-model="pessoa.aniversario"
-              placeholder="A data de aniversário(dd/mm)" data-toggle="tooltip" data-placement="top" 
-              title="A data de aniversário(dd/mm)">
+              <input type="text" class="form-control" id="aniversario" 
+              name="aniversario" v-model="pessoa.aniversario"
+              placeholder="A data de aniversário(dd/mm)" data-toggle="tooltip" 
+              data-placement="top" title="A data de aniversário(dd/mm)">
             </div>
           </div>
         
           <!-- Data inicio -->
           <div class="form-group row mb-3">
             <div class="col-2">
-              <label for="data_inicio" class="col-form-label">Data de início</label>
+              <label for="data_inicio" class="col-form-label">
+                Data de início</label>
             </div>
             <div class="col-2">
               <input type="text" class="form-control" id="data_inicio" 
@@ -118,13 +123,14 @@
           <!--Data de matricula -->
           <div class="form-group row mb-3">
             <div class="col-2">
-              <label for="data_inicio" class="col-form-label">Data de matrícula</label>
+              <label for="data_inicio" class="col-form-label">
+                Data de matrícula</label>
             </div>
             <div class="col-2">
-              <input type="text" class="form-control" id="data_matricula" name="data_matricula" 
-              v-model="pessoa.data_matricula"
-              placeholder="A data de matrícula" size="10" data-toggle="tooltip" data-placement="top" 
-              title="A data de início no aikidô">
+              <input type="text" class="form-control" id="data_matricula" 
+              name="data_matricula" v-model="pessoa.data_matricula"
+              placeholder="A data de matrícula" size="10" data-toggle="tooltip" 
+              data-placement="top" title="A data de matrícula">
             </div>
           </div>
         
@@ -176,8 +182,8 @@
             </button>
 
               <div v-if="pessoa.promocoes && pessoa.promocoes.length > 0">
-                <div v-for="(promocao, index) in pessoa.promocoes" 
-                  :key="index" class="form-group row mb-3">
+                <div id="promocoes" name="promocoes" class="form-group row mb-3"
+                v-for="(promocao, index) in pessoa.promocoes" :key="index">
                   
                   <div class="col-1">
                     <label :for="`data_promocao_${index + 1}`" 
