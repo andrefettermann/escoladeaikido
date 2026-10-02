@@ -40,14 +40,6 @@ export const DojoSchema = defineMongooseModel({
         type: String,
         required: false
     },
-//    id_professor: {
-//        type: String,
-//        required: false
-//    },
-//    horarios: {
-//        type: String,
-//        required: false
-//    },
     is_ativo: {
         type: Boolean,
         required: false

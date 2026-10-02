@@ -67,7 +67,7 @@
                                 <ul class="dropdown-menu">
                                     <li>
                                         <nuxt-link id="taxas" name="taxas" 
-                                        :to=" { path: '/taxas/lista_taxas' } " 
+                                        :to=" { path: '/taxas' } " 
                                         class="nav-link" aria-current="page">
                                             Taxas
                                         </nuxt-link>

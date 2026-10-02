@@ -38,8 +38,6 @@ export interface Graduacao {
   nome: string;
   faixa: string;
   categoria: string;
-//  minimo_horas_treino_exame: number;
-//  minimo_tempo_exame: number;
   observacoes: string;
   sequencia: number;
   tecnicas: {
@@ -87,4 +85,29 @@ export interface Pessoa {
   }
   tipo: string;
   is_ativo: boolean;
+}
+
+export interface Cobranca {
+  _id: string;
+  descricao: string;
+  valor: number;
+  data_vencimento: string;
+  situacao: string;
+  periodo_referencia: string;
+  observacoes: string;
+  pessoa?: {
+    _id: string;
+    nome: string;
+  }
+}
+
+export interface Taxa {
+  _id: string;
+  tipo: string;
+  descricao: string;
+  valor_padrao: number;
+  is_ativa: boolean;
+  periodo_referencia?: string;
+  observacoes?: string;
+  cobrancas?: Cobranca[];
 }
